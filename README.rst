@@ -56,9 +56,9 @@ Trying to use them while JWT authentication is enabled will result in a warning.
 Settings
 --------
 
-The ``config.set_jwt_authentication_policy()`` function takes a number of parameters
-to configure how JWT tokens are used. In addition you can also specify all
-settings in your configuration file.
+There are a number of flags that specify how tokens are created and verified.
+You can either set this in your .ini-file, or pass/override them directly to the
+ ``config.set_jwt_authentication_policy()`` function.
 
 +--------------+-----------------+---------------+--------------------------------------------+
 | Parameter    | ini-file entry  | Default value | Description                                |
@@ -67,10 +67,15 @@ settings in your configuration file.
 +--------------+-----------------+---------------+--------------------------------------------+
 | public_key   | jwt.public_key  |               | Key used to verify token signatures. Only  |
 |              |                 |               | used with assymetric algorithms.           |
++--------------+-----------------+---------------+--------------------------------------------+
 | algorithm    | jwt.algorithm   | HS512         | Hash or encryption algorithm               |
++--------------+-----------------+---------------+--------------------------------------------+
+| expiration   | expiration      |               | Number of seconds (or a datetime.timedelta |
+|              |                 |               | instance) before a token expires.          |
 +--------------+-----------------+---------------+--------------------------------------------+
 | leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
 |              |                 |               | expired before it is rejected.             |
++--------------+-----------------+---------------+--------------------------------------------+
 | http_header  | jwt.http_header | Authorization | HTTP header used for tokens                |
 +--------------+-----------------+---------------+--------------------------------------------+
 | auth_type    | jwt.auth_type   | JWT           | Authentication type used in Authorization  |
