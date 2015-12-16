@@ -4,6 +4,8 @@ JWT authentication for Pyramid
 This package implements an authentication policy for Pyramid that using  `JSON
 Web Tokens <http://jwt.io/>`_. This standard (`RFC 7519
 <https://tools.ietf.org/html/rfc7519>`_) is often used to secure backens APIs.
+The excellent `PyJWT <https://pyjwt.readthedocs.org/en/latest/>`_ library is
+used for the JWT encoding / decoding logic.
 
 Enabling JWT support in a Pyramid application is very simple:
 
