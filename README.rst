@@ -39,7 +39,7 @@ authentication view for a REST backend could look something like this:
     def login(request):
         login = request.POST['login']
         password = request.POST['password']
-        user_id = authenticate(login, password)
+        user_id = authenticate(login, password)  # You will need to implement this.
         if user_id:
             return {
                 'result': 'ok',
