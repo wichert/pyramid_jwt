@@ -70,7 +70,7 @@ You can either set this in your .ini-file, or pass/override them directly to the
 +--------------+-----------------+---------------+--------------------------------------------+
 | algorithm    | jwt.algorithm   | HS512         | Hash or encryption algorithm               |
 +--------------+-----------------+---------------+--------------------------------------------+
-| expiration   | expiration      |               | Number of seconds (or a datetime.timedelta |
+| expiration   | jwt.expiration  |               | Number of seconds (or a datetime.timedelta |
 |              |                 |               | instance) before a token expires.          |
 +--------------+-----------------+---------------+--------------------------------------------+
 | leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
