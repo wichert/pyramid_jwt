@@ -1,6 +1,7 @@
 *.pyc
 __pycache__
 /.cache
+
 /bin
 /build
 /lib
@@ -8,3 +9,6 @@ __pycache__
 /pip-selfcheck.json
 /pyvenv.cfg
 /src/pyramid_jwt.egg-info/
+
+/.coverage
+/htmlcov

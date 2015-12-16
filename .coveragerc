@@ -1,0 +1,7 @@
+[run]
+branch = True
+
+[paths]
+source =
+    tests/
+    src/fullint/
