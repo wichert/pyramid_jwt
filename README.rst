@@ -61,7 +61,7 @@ You can either set this in your .ini-file, or pass/override them directly to the
  ``config.set_jwt_authentication_policy()`` function.
 
 +--------------+-----------------+---------------+--------------------------------------------+
-| Parameter    | ini-file entry  | Default value | Description                                |
+| Parameter    | ini-file entry  | Default       | Description                                |
 +==============+=================+===============+============================================+
 | private_key  | jwt.private_key |               | Key used to hash or sign tokens.           |
 +--------------+-----------------+---------------+--------------------------------------------+
