@@ -14,6 +14,12 @@ def test_interface():
     verifyObject(IAuthenticationPolicy, JWTAuthenticationPolicy('secret'))
 
 
+def test_token_most_be_str():
+    policy = JWTAuthenticationPolicy('secret')
+    token = policy.create_token(15)
+    assert isinstance(token, str)
+
+
 def test_minimal_roundtrip():
     policy = JWTAuthenticationPolicy('secret')
     request = Request.blank('/')
