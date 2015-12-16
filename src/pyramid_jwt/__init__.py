@@ -10,7 +10,7 @@ def includeme(config):
 
 def set_jwt_authentication_policy(config, private_key=None, public_key=None,
         algorithm=None, leeway=None,
-        header=None, auth_type=None, callback=None):
+        http_header=None, auth_type=None, callback=None):
     settings = config.get_settings()
     private_key = private_key or settings.get('jwt.private_key')
     algorithm = algorithm or settings.get('jwt.algorithm') or 'HS512'
@@ -19,7 +19,7 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
     else:
             public_key = None
     leeway = leeway or settings.get('jwt.leeway') or 0
-    http_header = header or settings.get('jwt.http_header')
+    http_header = http_header or settings.get('jwt.http_header')
     if http_header.lower() == 'authorization':
             auth_type = auth_type or settings.get('jwt.auth_type') or 'JWT'
     else:

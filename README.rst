@@ -51,3 +51,28 @@ authentication view for a REST backend could look something like this:
 Since JWT is typically used via HTTP headers and does not use cookies the
 standard ``remember()`` and ``forget()`` functions from Pyramid are not useful.
 Trying to use them while JWT authentication is enabled will result in a warning.
+
+
+Settings
+--------
+
+The ``config.set_jwt_authentication_policy()`` function takes a number of parameters
+to configure how JWT tokens are used. In addition you can also specify all
+settings in your configuration file.
+
++--------------+-----------------+---------------+--------------------------------------------+
+| Parameter    | ini-file entry  | Default value | Description                                |
++==============+=================+===============+============================================+
+| private_key  | jwt.private_key |               | Key used to hash or sign tokens.           |
++--------------+-----------------+---------------+--------------------------------------------+
+| public_key   | jwt.public_key  |               | Key used to verify token signatures. Only  |
+|              |                 |               | used with assymetric algorithms.           |
+| algorithm    | jwt.algorithm   | HS512         | Hash or encryption algorithm               |
++--------------+-----------------+---------------+--------------------------------------------+
+| leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
+|              |                 |               | expired before it is rejected.             |
+| http_header  | jwt.http_header | Authorization | HTTP header used for tokens                |
++--------------+-----------------+---------------+--------------------------------------------+
+| auth_type    | jwt.auth_type   | JWT           | Authentication type used in Authorization  |
+|              |                 |               | header. Unused for other HTTP headers.     |
++--------------+-----------------+---------------+--------------------------------------------+
