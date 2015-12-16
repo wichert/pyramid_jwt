@@ -1,0 +1,9 @@
+*.pyc
+/.cache
+/bin
+/build
+/lib
+/share
+/pip-selfcheck.json
+/pyvenv.cfg
+/src/pyramid_jwt.egg-info/
