@@ -2,7 +2,7 @@ from .policy import JWTAuthenticationPolicy
 
 
 def includeme(config):
-    config.add_directory(
+    config.add_directive(
         'set_jwt_authentication_policy',
         set_jwt_authentication_policy,
         action_wrap=True)
@@ -20,7 +20,7 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             public_key = None
     expiration = expiration or settings.get('jwt.expiration')
     leeway = leeway or settings.get('jwt.leeway') or 0
-    http_header = http_header or settings.get('jwt.http_header')
+    http_header = http_header or settings.get('jwt.http_header') or 'Authorization'
     if http_header.lower() == 'authorization':
             auth_type = auth_type or settings.get('jwt.auth_type') or 'JWT'
     else:

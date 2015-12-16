@@ -7,11 +7,12 @@ version = '1.0'
 install_requires = [
     'pyramid',
     'PyJWT',
-    ]
+]
 
 tests_require = [
     'pytest',
-    ]
+    'WebTest',
+]
 
 
 class PyTest(TestCommand):
