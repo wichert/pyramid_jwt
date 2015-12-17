@@ -34,6 +34,13 @@ def test_wrong_auth_scheme():
     assert policy.unauthenticated_userid(request) is None
 
 
+def test_invalid_authorization_header():
+    policy = JWTAuthenticationPolicy('secret')
+    request = Request.blank('/')
+    request.environ['HTTP_AUTHORIZATION'] = 'token'
+    assert policy.unauthenticated_userid(request) is None
+
+
 def test_other_header():
     policy = JWTAuthenticationPolicy('secret', http_header='X-Token')
     request = Request.blank('/')

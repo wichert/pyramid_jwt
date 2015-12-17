@@ -44,7 +44,10 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
 
     def unauthenticated_userid(self, request):
         if self.http_header == 'Authorization':
-            if request.authorization is None:
+            try:
+                if request.authorization is None:
+                    return None
+            except ValueError:  # Invalid Authorization header
                 return None
             (auth_type, token) = request.authorization
             if auth_type != self.auth_type:
