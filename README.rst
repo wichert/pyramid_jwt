@@ -25,7 +25,7 @@ Enabling JWT support in a Pyramid application is very simple:
 This will set a JWT authentication policy using the `Authorization` HTTP header
 with a `JWT` scheme to retrieve tokens. Using another HTTP header is trivial:
 
-::
+.. code-block:: python
 
     config.set_jwt_authentication_policy('secret', http_header='X-My-Header')
 
