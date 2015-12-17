@@ -60,7 +60,7 @@ Settings
 
 There are a number of flags that specify how tokens are created and verified.
 You can either set this in your .ini-file, or pass/override them directly to the
- ``config.set_jwt_authentication_policy()`` function.
+``config.set_jwt_authentication_policy()`` function.
 
 +--------------+-----------------+---------------+--------------------------------------------+
 | Parameter    | ini-file entry  | Default       | Description                                |

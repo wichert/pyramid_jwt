@@ -4,6 +4,7 @@ __pycache__
 
 /bin
 /build
+/dist
 /lib
 /share
 /pip-selfcheck.json
