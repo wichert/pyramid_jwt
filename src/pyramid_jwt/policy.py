@@ -31,12 +31,15 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             self.expiration = None
         self.callback = callback
 
-    def create_token(self, principal):
+    def create_token(self, principal, expiration=None):
         payload = self.default_claims.copy()
         payload['sub'] = principal
         payload['iat'] = iat = datetime.datetime.utcnow()
-        if self.expiration:
-            payload['exp'] = iat + self.expiration
+        expiration = expiration or self.expiration
+        if expiration:
+            if not isinstance(expiration, datetime.timedelta):
+                    expiration = datetime.timedelta(seconds=expiration)
+            payload['exp'] = iat + expiration
         token = jwt.encode(payload, self.private_key, algorithm=self.algorithm)
         if not isinstance(token, str):  # Python3 unicode madness
             token = token.decode('ascii')

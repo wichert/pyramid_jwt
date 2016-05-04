@@ -57,6 +57,19 @@ def test_expired_token():
     assert policy.unauthenticated_userid(request) == 15
 
 
+def test_dynamic_expired_token():
+    policy = JWTAuthenticationPolicy('secret', expiration=-1)
+    request = Request.blank('/')
+    request.authorization = ('JWT', policy.create_token(15, expiration=5))
+    assert policy.unauthenticated_userid(request) == 15
+
+    policy = JWTAuthenticationPolicy('secret')
+    request.authorization = ('JWT', policy.create_token(15, expiration=-1))
+    assert policy.unauthenticated_userid(request) is None
+    request.authorization = ('JWT', policy.create_token(15))
+    assert policy.unauthenticated_userid(request) == 15
+
+
 def test_remember_warning():
     policy = JWTAuthenticationPolicy('secret', http_header='X-Token')
     with testConfig() as config:
