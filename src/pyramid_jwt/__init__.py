@@ -8,7 +8,7 @@ def includeme(config):
         action_wrap=True)
 
 
-def set_jwt_authentication_policy(config, private_key=None, public_key=None,
+def create_jwt_authentication_policy(config, private_key=None, public_key=None,
         algorithm=None, expiration=None, leeway=None,
         http_header=None, auth_type=None, callback=None):
     settings = config.get_settings()
@@ -26,7 +26,7 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             auth_type = auth_type or settings.get('jwt.auth_type') or 'JWT'
     else:
             auth_type = None
-    policy = JWTAuthenticationPolicy(
+    return JWTAuthenticationPolicy(
             private_key=private_key,
             public_key=public_key,
             algorithm=algorithm,
@@ -35,6 +35,15 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             http_header=http_header,
             auth_type=auth_type,
             callback=callback)
+
+
+def set_jwt_authentication_policy(config, private_key=None, public_key=None,
+        algorithm=None, expiration=None, leeway=None,
+        http_header=None, auth_type=None, callback=None):
+    policy = create_jwt_authentication_policy(
+            config, private_key, public_key,
+            algorithm, expiration, leeway,
+            http_header, auth_type, callback)
 
     def request_create_token(request, principal, expiration=None):
             return policy.create_token(principal, expiration)
