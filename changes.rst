@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.1 - Unreleased
------------------------
+1.1 - May 4, 2016
+-----------------
 
 - `Issue #2 <https://github.com/wichert/pyramid_jwt/issues/2>`_:
   Support setting and reading extra claims in a JWT token.
@@ -12,7 +12,7 @@ Changelog
   Submitted by `Daniel Kraus <https://github.com/dakra>`_.
 
 - `Pull request #3 <https://github.com/wichert/pyramid_jwt/pull/3>`_:
-- Allow overriding the expiration timestamp for a token when creating a new
+  Allow overriding the expiration timestamp for a token when creating a new
   token. Submitted by `Daniel Kraus`_.
 
 
