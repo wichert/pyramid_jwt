@@ -46,7 +46,11 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             http_header, auth_type, callback)
 
     def request_create_token(request, principal, expiration=None, **claims):
-            return policy.create_token(principal, expiration, **claims)
+        return policy.create_token(principal, expiration, **claims)
+
+    def request_claims(request):
+        return policy.get_claims(request)
 
     config.set_authentication_policy(policy)
     config.add_request_method(request_create_token, 'create_jwt_token')
+    config.add_request_method(request_claims, 'jwt_claims', reify=True)

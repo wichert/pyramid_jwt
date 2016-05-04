@@ -62,11 +62,28 @@ Normally pyramid_jwt only makes a single JWT claim: the *subject* (or
 ``sub`` claim) is set to the principal. You can also add extra claims to the
 token by passing keyword parameters to the ``create_jwt_token`` method.
 
-.. code-block:: Python
+.. code-block:: python
 
    token = request.create_jwt_token(user.id,
        name=user.name,
        admin=(user.role == 'admin'))
+
+
+All claims found in a JWT token can be accessed through the ``jwt_claims``
+dictionary property on a request. For the above example you can retrieve the
+name and admin-status for the user directly from the request:
+
+.. code-block:: python
+
+   print('User id: %d' % request.authenticated_userid)
+   print('Users name: %s', request.jwt_claims['name'])
+   if request.jwt_claims['admin']:
+      print('This user is an admin!')
+
+Keep in mind that data ``jwt_claims`` only reflects the claims from a JWT
+token and do not check if the user is valid: the callback configured for the
+authentication policy is *not* checked. For this reason you should always use
+``request.authenticated_userid`` instead of ``request.jwt_claims['sub']``.
 
 
 Settings

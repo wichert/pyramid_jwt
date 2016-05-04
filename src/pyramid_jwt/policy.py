@@ -8,7 +8,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 
 
 log = logging.getLogger('pyramid_jwt')
-
+marker = []
 
 @implementer(IAuthenticationPolicy)
 class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
@@ -46,26 +46,29 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = token.decode('ascii')
         return token
 
-    def unauthenticated_userid(self, request):
+    def get_claims(self, request):
         if self.http_header == 'Authorization':
             try:
                 if request.authorization is None:
-                    return None
+                    return {}
             except ValueError:  # Invalid Authorization header
-                return None
+                return {}
             (auth_type, token) = request.authorization
             if auth_type != self.auth_type:
-                return None
+                return {}
         else:
             token = request.headers.get(self.http_header)
         if not token:
-            return None
+            return {}
         try:
-            payload = jwt.decode(token, self.public_key, algorithm=[self.algorithm], leeway=self.leeway)
+            claims = jwt.decode(token, self.public_key, algorithm=[self.algorithm], leeway=self.leeway)
         except jwt.InvalidTokenError as e:
             log.warn('Invalid JWT token from %s: %s', request.remote_addr, e)
-            return None
-        return payload.get('sub')
+            return {}
+        return claims
+
+    def unauthenticated_userid(self, request):
+        return request.jwt_claims.get('sub')
 
     def remember(self, request, principal, **kw):
         warnings.warn(
