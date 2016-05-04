@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import sys
 
-version = '1.0'
+version = '1.1'
 
 install_requires = [
     'pyramid',
