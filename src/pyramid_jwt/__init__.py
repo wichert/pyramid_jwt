@@ -18,8 +18,9 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             public_key = public_key or settings.get('jwt.public_key')
     else:
             public_key = None
-    expiration = expiration or settings.get('jwt.expiration')
-    leeway = leeway or settings.get('jwt.leeway') or 0
+    if expiration is None and 'jwt.expiration' in settings:
+        expiration = int(settings.get('jwt.expiration'))
+    leeway = int(settings.get('jwt.leeway', 0)) if leeway is None else leeway
     http_header = http_header or settings.get('jwt.http_header') or 'Authorization'
     if http_header.lower() == 'authorization':
             auth_type = auth_type or settings.get('jwt.auth_type') or 'JWT'
