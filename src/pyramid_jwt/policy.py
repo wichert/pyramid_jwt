@@ -31,8 +31,9 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             self.expiration = None
         self.callback = callback
 
-    def create_token(self, principal, expiration=None):
+    def create_token(self, principal, expiration=None, **claims):
         payload = self.default_claims.copy()
+        payload.update(claims)
         payload['sub'] = principal
         payload['iat'] = iat = datetime.datetime.utcnow()
         expiration = expiration or self.expiration

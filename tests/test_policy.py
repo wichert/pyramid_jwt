@@ -1,6 +1,8 @@
+# vim: fileencoding=utf-8
 import warnings
 from webob import Request
 from zope.interface.verify import verifyObject
+import jwt
 from pyramid.security import forget
 from pyramid.security import remember
 from pyramid.testing import testConfig
@@ -25,6 +27,14 @@ def test_minimal_roundtrip():
     request = Request.blank('/')
     request.authorization = ('JWT', policy.create_token(15))
     assert policy.unauthenticated_userid(request) == 15
+
+
+def test_extra_claims():
+    policy = JWTAuthenticationPolicy('secret')
+    token = policy.create_token(15, name=u'Jöhn', admin=True)
+    payload = jwt.decode(token, 'secret', algorithm=[policy.algorithm])
+    assert payload['name'] == u'Jöhn'
+    assert payload['admin']
 
 
 def test_wrong_auth_scheme():

@@ -45,8 +45,8 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
             algorithm, expiration, leeway,
             http_header, auth_type, callback)
 
-    def request_create_token(request, principal, expiration=None):
-            return policy.create_token(principal, expiration)
+    def request_create_token(request, principal, expiration=None, **claims):
+            return policy.create_token(principal, expiration, **claims)
 
     config.set_authentication_policy(policy)
     config.add_request_method(request_create_token, 'create_jwt_token')

@@ -55,6 +55,20 @@ standard ``remember()`` and ``forget()`` functions from Pyramid are not useful.
 Trying to use them while JWT authentication is enabled will result in a warning.
 
 
+Extra claims
+------------
+
+Normally pyramid_jwt only makes a single JWT claim: the *subject* (or
+``sub`` claim) is set to the principal. You can also add extra claims to the
+token by passing keyword parameters to the ``create_jwt_token`` method.
+
+.. code-block:: Python
+
+   token = request.create_jwt_token(user.id,
+       name=user.name,
+       admin=(user.role == 'admin'))
+
+
 Settings
 --------
 
