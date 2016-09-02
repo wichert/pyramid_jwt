@@ -85,6 +85,30 @@ token and do not check if the user is valid: the callback configured for the
 authentication policy is *not* checked. For this reason you should always use
 ``request.authenticated_userid`` instead of ``request.jwt_claims['sub']``.
 
+You can also use extra claims to manage extra principals for users. For example
+you could claims to represent add group membership or roles for a user. This
+requires two steps: first add the extra claims to the JWT token as shown above,
+and then use the authentication policy's callback hook to turn the extra claim
+into principals. Here is a quick example:
+
+.. code-block:: python
+
+   def add_role_principals(userid, request):
+      return ['role:%s' % role for role in request.jwt_claims.get('roles', [])]
+       
+   config.set_jwt_authentication_policy(callback=add_role_principals)
+
+
+You can then use the role principals in an ACL:
+
+.. code-block:: python
+
+   class MyView:
+       __acl__ = [
+           (Allow, Everyone, ['read']),
+           (Allow, 'role:admin, ['create', 'update']),
+       ]
+
 
 Settings
 --------
