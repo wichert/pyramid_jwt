@@ -106,7 +106,7 @@ You can then use the role principals in an ACL:
    class MyView:
        __acl__ = [
            (Allow, Everyone, ['read']),
-           (Allow, 'role:admin, ['create', 'update']),
+           (Allow, 'role:admin', ['create', 'update']),
        ]
 
 
