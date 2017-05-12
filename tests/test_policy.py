@@ -9,6 +9,10 @@ from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
 from pyramid_jwt.policy import JWTAuthenticationPolicy
+import uuid
+import pytest
+from json.encoder import JSONEncoder
+from uuid import UUID
 
 
 def test_interface():
@@ -116,3 +120,26 @@ def test_forget_warning():
     assert issubclass(w[-1].category, UserWarning)
     assert 'JWT tokens' in str(w[-1].message)
     assert w[-1].filename.endswith('test_policy.py')
+    
+class MyCustomJsonEncoder(JSONEncoder):
+
+    def default(self, o):
+        if type(o) is UUID:
+            return str(o)
+        # Let the base class default method raise the TypeError
+        return JSONEncoder.default(self, o)
+
+def test_custom_json_encoder():
+    policy = JWTAuthenticationPolicy('secret')
+    principal_id = uuid.uuid4()
+    claim_value = uuid.uuid4()
+    with pytest.raises(TypeError):
+        token = policy.create_token('subject', uuid_value=claim_value)
+    policy = JWTAuthenticationPolicy('secret', json_encoder=MyCustomJsonEncoder)
+    
+    request = Request.blank('/')
+    request.authorization = ('JWT', policy.create_token(principal_id, uuid_value=claim_value))
+    request.jwt_claims = policy.get_claims(request)
+    assert policy.unauthenticated_userid(request) == str(principal_id)
+    assert request.jwt_claims.get('uuid_value') == str(claim_value)
+    
