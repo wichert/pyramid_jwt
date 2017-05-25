@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import sys
 
-version = '1.1'
+version = '1.2'
 
 install_requires = [
     'pyramid',
@@ -43,6 +43,7 @@ setup(name='pyramid_jwt',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Topic :: Software Development :: Libraries :: Python Modules',
       ],
       keywords='Pyramid JWT authentication security',

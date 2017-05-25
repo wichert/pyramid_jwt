@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.2 - May 25, 2017
+-----------------
+
+- Fix a `log.warn` deprecation warning on Python 3.6.
+
+
 1.1 - May 4, 2016
 -----------------
 
