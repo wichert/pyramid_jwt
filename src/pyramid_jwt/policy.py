@@ -15,7 +15,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
     def __init__(self, private_key, public_key=None, algorithm='HS512',
             leeway=0, expiration=None, default_claims=None,
             http_header='Authorization', auth_type='JWT',
-            callback=None):
+            callback=None, json_encoder=None):
         self.private_key = private_key
         self.public_key = public_key if public_key is not None else private_key
         self.algorithm = algorithm
@@ -30,6 +30,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         else:
             self.expiration = None
         self.callback = callback
+        self.json_encoder = json_encoder
 
     def create_token(self, principal, expiration=None, **claims):
         payload = self.default_claims.copy()
@@ -41,7 +42,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             if not isinstance(expiration, datetime.timedelta):
                     expiration = datetime.timedelta(seconds=expiration)
             payload['exp'] = iat + expiration
-        token = jwt.encode(payload, self.private_key, algorithm=self.algorithm)
+        token = jwt.encode(payload, self.private_key, algorithm=self.algorithm, json_encoder=self.json_encoder)
         if not isinstance(token, str):  # Python3 unicode madness
             token = token.decode('ascii')
         return token
