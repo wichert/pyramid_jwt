@@ -2,9 +2,16 @@ Changelog
 =========
 
 1.2 - May 25, 2017
------------------
+------------------
 
 - Fix a `log.warn` deprecation warning on Python 3.6.
+
+- Documentation improvements, courtesy of `Éric Araujo <https://github.com/merwok>`_
+  and `Guillermo Cruz <https://github.com/webjunkie01>`_.
+
+- `Pull request #10 <https://github.com/wichert/pyramid_jwt/pull/10>`_
+  Allow use of a custom JSON encoder.
+  Submitted by `Julien Meyer <https://github.com/julienmeyer>`_.
 
 
 1.1 - May 4, 2016
