@@ -110,33 +110,31 @@ You can then use the role principals in an ACL:
        ]
 
 Validation Example
---------
+------------------
 
-
-
-After creating and returning the token through your API with ``create_jwt_token`` you can test by issuing an HTTP authorization header type for JWT.
+After creating and returning the token through your API with
+``create_jwt_token`` you can test by issuing an HTTP authorization header type
+for JWT.
 
 .. code-block:: text
 
-GET /resource HTTP/1.1
-
-Host: server.example.com
-
-Authorization: JWT eyJhbGciOiJIUzI1NiIXVCJ9...TJVA95OrM7E20RMHrHDcEfxjoYZgeFONFh7HgQ
+   GET /resource HTTP/1.1
+   Host: server.example.com
+   Authorization: JWT eyJhbGciOiJIUzI1NiIXVCJ9...TJVA95OrM7E20RMHrHDcEfxjoYZgeFONFh7HgQ
 
 We can test using curl.
 
 .. code-block:: bash
 
-curl --header 'Authorization: JWT TOKEN' server.example.com/ROUTE_PATH
+   curl --header 'Authorization: JWT TOKEN' server.example.com/ROUTE_PATH
 
 .. code-block:: python
 
-  config.add_route('example', '/ROUTE_PATH')
-  @view_config(route_name=example)
-  def some_action(request):
-    if request.authenticated_userid:
-        #do something
+   config.add_route('example', '/ROUTE_PATH')
+   @view_config(route_name=example)
+   def some_action(request):
+       if request.authenticated_userid:
+           # Do something
 
 
 Settings
