@@ -5,7 +5,7 @@ PasteDeploy==1.5.2
 py==1.4.31
 PyJWT==1.4.0
 pyramid==1.5.7
-pytest==2.8.5
+pytest==3.1.0
 pytest-cov==2.2.0
 repoze.lru==0.6
 six==1.10.0
