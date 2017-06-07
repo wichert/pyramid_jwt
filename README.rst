@@ -95,7 +95,7 @@ into principals. Here is a quick example:
 
    def add_role_principals(userid, request):
       return ['role:%s' % role for role in request.jwt_claims.get('roles', [])]
-       
+
    config.set_jwt_authentication_policy(callback=add_role_principals)
 
 
@@ -106,8 +106,35 @@ You can then use the role principals in an ACL:
    class MyView:
        __acl__ = [
            (Allow, Everyone, ['read']),
-           (Allow, 'role:admin, ['create', 'update']),
+           (Allow, 'role:admin', ['create', 'update']),
        ]
+
+Validation Example
+------------------
+
+After creating and returning the token through your API with
+``create_jwt_token`` you can test by issuing an HTTP authorization header type
+for JWT.
+
+.. code-block:: text
+
+   GET /resource HTTP/1.1
+   Host: server.example.com
+   Authorization: JWT eyJhbGciOiJIUzI1NiIXVCJ9...TJVA95OrM7E20RMHrHDcEfxjoYZgeFONFh7HgQ
+
+We can test using curl.
+
+.. code-block:: bash
+
+   curl --header 'Authorization: JWT TOKEN' server.example.com/ROUTE_PATH
+
+.. code-block:: python
+
+   config.add_route('example', '/ROUTE_PATH')
+   @view_config(route_name=example)
+   def some_action(request):
+       if request.authenticated_userid:
+           # Do something
 
 
 Settings
@@ -137,4 +164,7 @@ You can either set this in your .ini-file, or pass/override them directly to the
 +--------------+-----------------+---------------+--------------------------------------------+
 | auth_type    | jwt.auth_type   | JWT           | Authentication type used in Authorization  |
 |              |                 |               | header. Unused for other HTTP headers.     |
++--------------+-----------------+---------------+--------------------------------------------+
+| json_encoder |                 | None          | A subclass of JSONEncoder to be used       |
+|              |                 |               | to encode principal and claims infos.      |
 +--------------+-----------------+---------------+--------------------------------------------+
