@@ -1,4 +1,5 @@
 from .policy import JWTAuthenticationPolicy
+from pyramid.renderers import json_renderer_factory
 
 
 def includeme(config):
@@ -10,7 +11,7 @@ def includeme(config):
 
 def create_jwt_authentication_policy(config, private_key=None, public_key=None,
         algorithm=None, expiration=None, leeway=None,
-        http_header=None, auth_type=None, callback=None, json_encoder=None):
+        http_header=None, auth_type=None, callback=None, json_encoder=json_renderer_factory):
     settings = config.get_settings()
     private_key = private_key or settings.get('jwt.private_key')
     algorithm = algorithm or settings.get('jwt.algorithm') or 'HS512'
@@ -40,7 +41,7 @@ def create_jwt_authentication_policy(config, private_key=None, public_key=None,
 
 def set_jwt_authentication_policy(config, private_key=None, public_key=None,
         algorithm=None, expiration=None, leeway=None,
-        http_header=None, auth_type=None, callback=None, json_encoder=None):
+        http_header=None, auth_type=None, callback=None, json_encoder=json_renderer_factory):
     policy = create_jwt_authentication_policy(
             config, private_key, public_key,
             algorithm, expiration, leeway,

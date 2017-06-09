@@ -5,6 +5,7 @@ import jwt
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.interfaces import IAuthenticationPolicy
+from pyramid.renderers import json_renderer_factory
 
 
 log = logging.getLogger('pyramid_jwt')
@@ -15,7 +16,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
     def __init__(self, private_key, public_key=None, algorithm='HS512',
             leeway=0, expiration=None, default_claims=None,
             http_header='Authorization', auth_type='JWT',
-            callback=None, json_encoder=None):
+            callback=None, json_encoder=json_renderer_factory):
         self.private_key = private_key
         self.public_key = public_key if public_key is not None else private_key
         self.algorithm = algorithm
