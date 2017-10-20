@@ -62,7 +62,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         if not token:
             return {}
         try:
-            claims = jwt.decode(token, self.public_key, algorithm=[self.algorithm], leeway=self.leeway)
+            claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm], leeway=self.leeway)
         except jwt.InvalidTokenError as e:
             log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
             return {}
