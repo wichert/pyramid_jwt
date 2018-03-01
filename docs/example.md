@@ -129,9 +129,9 @@ In the example posted above we creating an "admin" role that we gave ALL_PERMISS
 def view_a(request):
     return
 
-@view_config(route_name='view_a', request_method='GET', 
+@view_config(route_name='view_b', request_method='GET', 
              permission="cpanel", renderer='json')
-def view_a(request):
+def view_b(request):
     return
 ```
 
