@@ -6,9 +6,9 @@ have followed the Readme for this project) that will explain how (and why) to
 use JWT to secure/restrict access to a pyramid REST style backend API, this
 guide will explain a basic overview on:
 
-  - Creating JWT's
-  - Decoding JWT's
-  - Restricting access to certain pyramid views via JWT's
+- Creating JWT's
+- Decoding JWT's
+- Restricting access to certain pyramid views via JWT's
 
 
 Creating JWT's
