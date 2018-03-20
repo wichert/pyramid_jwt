@@ -33,7 +33,7 @@ setup(name='pyramid_jwt',
       version=version,
       description='JWT authentication policy for Pyramid',
       long_description=open('README.rst').read() + '\n' +
-              open(os.path.join('docs', 'example.rst').read() + '\n' +
+              open(os.path.join('docs', 'example.rst')).read() + '\n' +
               open('changes.rst').read(),
       classifiers=[
           'Intended Audience :: Developers',
