@@ -1,6 +1,7 @@
+import os
+import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-import sys
 
 version = '1.3'
 
@@ -32,6 +33,7 @@ setup(name='pyramid_jwt',
       version=version,
       description='JWT authentication policy for Pyramid',
       long_description=open('README.rst').read() + '\n' +
+              open(os.path.join('docs', 'example.rst').read() + '\n' +
               open('changes.rst').read(),
       classifiers=[
           'Intended Audience :: Developers',

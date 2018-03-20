@@ -6,6 +6,9 @@ Changelog
 
 - `Issue #20 <https://github.com/wichert/pyramid_jwt/issues/20>`_:
   Fix handling of public keys.
+- `Pull request #17 <https://github.com/wichert/pyramid_jwt/pull/17>`_:
+  a lot of documentation improvements from `Luke Crooks
+  <https://github.com/crooksey>`_.
 
 
 1.2 - May 25, 2017
