@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.3 - March 20, 2018
+---------------------
+
+- `Issue #20 <https://github.com/wichert/pyramid_jwt/issues/20>`_:
+  Fix handling of public keys.
+
+
 1.2 - May 25, 2017
 ------------------
 
