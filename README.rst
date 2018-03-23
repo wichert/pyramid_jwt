@@ -168,7 +168,6 @@ You can either set this in your .ini-file, or pass/override them directly to the
 |              |                 |               | instance) before a token expires.          |
 +--------------+-----------------+---------------+--------------------------------------------+
 | audience     | jwt.audience    |               | Proposed audience for the token            |
-|              |                 |               | instance) before a token expires.          |
 +--------------+-----------------+---------------+--------------------------------------------+
 | leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
 |              |                 |               | expired before it is rejected.             |

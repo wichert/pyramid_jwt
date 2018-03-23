@@ -54,6 +54,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = token.decode('ascii')
         return token
 
+
     def get_claims(self, request):
         if self.http_header == 'Authorization':
             try:
@@ -68,6 +69,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = request.headers.get(self.http_header)
         if not token:
             return {}
+        
         audience =self.audience
         if audience:
             try:
@@ -85,7 +87,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
                 return claims
             except jwt.InvalidTokenError as e:
                 log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
-                return {}
+return {}
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')

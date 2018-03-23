@@ -12,7 +12,7 @@ install_requires = [
 
 tests_require = [
     'pytest',
-    'WebTest'
+    'WebTest',
 ]
 
 
