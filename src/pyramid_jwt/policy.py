@@ -87,7 +87,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
                 return claims
             except jwt.InvalidTokenError as e:
                 log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
-return {}
+        return {}
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')
