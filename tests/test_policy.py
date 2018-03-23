@@ -33,6 +33,29 @@ def test_minimal_roundtrip():
     assert policy.unauthenticated_userid(request) == 15
 
 
+def test_audience_valid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.org')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    assert jwt_claims['aud'] == 'example.org'
+
+def test_audience_invalid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.com')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    assert jwt_claims == {}
+
+
+def test_algorithm_unsupported():
+    policy = JWTAuthenticationPolicy('secret', algorithm='SHA1')
+    with pytest.raises(NotImplementedError):
+        token = policy.create_token(15, name=u'Jöhn', admin=True )
+
+
 def test_extra_claims():
     policy = JWTAuthenticationPolicy('secret')
     token = policy.create_token(15, name=u'Jöhn', admin=True)

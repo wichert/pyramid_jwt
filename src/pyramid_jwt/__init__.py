@@ -9,7 +9,7 @@ def includeme(config):
 
 
 def create_jwt_authentication_policy(config, private_key=None, public_key=None,
-        algorithm=None, expiration=None, leeway=None,
+        algorithm=None, expiration=None, leeway=None, audience=None,
         http_header=None, auth_type=None, callback=None, json_encoder=None):
     settings = config.get_settings()
     private_key = private_key or settings.get('jwt.private_key')
@@ -32,6 +32,7 @@ def create_jwt_authentication_policy(config, private_key=None, public_key=None,
             algorithm=algorithm,
             leeway=leeway,
             expiration=expiration,
+            audience=audience,
             http_header=http_header,
             auth_type=auth_type,
             callback=callback,
@@ -39,15 +40,15 @@ def create_jwt_authentication_policy(config, private_key=None, public_key=None,
 
 
 def set_jwt_authentication_policy(config, private_key=None, public_key=None,
-        algorithm=None, expiration=None, leeway=None,
+        algorithm=None, expiration=None, leeway=None, audience=None,
         http_header=None, auth_type=None, callback=None, json_encoder=None):
     policy = create_jwt_authentication_policy(
             config, private_key, public_key,
-            algorithm, expiration, leeway,
+            algorithm, expiration, leeway, audience,
             http_header, auth_type, callback, json_encoder)
 
-    def request_create_token(request, principal, expiration=None, **claims):
-        return policy.create_token(principal, expiration, **claims)
+    def request_create_token(request, principal, expiration=None, audience=None, **claims):
+        return policy.create_token(principal, expiration, audience, **claims)
 
     def request_claims(request):
         return policy.get_claims(request)
