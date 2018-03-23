@@ -33,11 +33,11 @@ def create_jwt_authentication_policy(config, private_key=None, public_key=None,
             algorithm=algorithm,
             leeway=leeway,
             expiration=expiration,
-            audience=audience,
             http_header=http_header,
             auth_type=auth_type,
             callback=callback,
-            json_encoder=json_encoder)
+            json_encoder=json_encoder,
+            audience=audience)
 
 
 def set_jwt_authentication_policy(config, private_key=None, public_key=None,
@@ -46,8 +46,8 @@ def set_jwt_authentication_policy(config, private_key=None, public_key=None,
         audience=None,):
     policy = create_jwt_authentication_policy(
             config, private_key, public_key,
-            algorithm, expiration, leeway, audience,
-            http_header, auth_type, callback, json_encoder)
+            algorithm, expiration, leeway,
+            http_header, auth_type, callback, json_encoder, audience)
 
     def request_create_token(request, principal, expiration=None, audience=None, **claims):
         return policy.create_token(principal, expiration, audience, **claims)

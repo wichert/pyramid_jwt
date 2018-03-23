@@ -13,9 +13,9 @@ marker = []
 @implementer(IAuthenticationPolicy)
 class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
     def __init__(self, private_key, public_key=None, algorithm='HS512',
-            leeway=0, expiration=None, audience=None, default_claims=None,
+            leeway=0, expiration=None, default_claims=None,
             http_header='Authorization', auth_type='JWT',
-            callback=None, json_encoder=None):
+            callback=None, json_encoder=None, audience=None,):
         self.private_key = private_key
         self.public_key = public_key if public_key is not None else private_key
         self.algorithm = algorithm
@@ -74,7 +74,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         if audience:
             try:
                 claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
-                                    audience=audience, leeway=self.leeway)
+                                    leeway=self.leeway, audience=audience,)
                 return claims
             except jwt.InvalidTokenError as e:
                 log.warning('Invalid matched audience for JWT token from %s: %s', 
