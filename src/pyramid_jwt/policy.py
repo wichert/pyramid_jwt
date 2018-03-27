@@ -69,25 +69,14 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = request.headers.get(self.http_header)
         if not token:
             return {}
-        
-        audience =self.audience
-        if audience:
-            try:
-                claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
-                                    leeway=self.leeway, audience=audience,)
-                return claims
-            except jwt.InvalidTokenError as e:
-                log.warning('Invalid matched audience for JWT token from %s: %s', 
-                            request.remote_addr, e)
-                return {}
-        else:
-            try:
-                claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
-                                    leeway=self.leeway)
-                return claims
-            except jwt.InvalidTokenError as e:
-                log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
-                return {}
+        try:
+            claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
+                                leeway=self.leeway, audience=self.audience)
+            return claims
+        except jwt.InvalidTokenError as e:
+            log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
+            return {}
+
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')
