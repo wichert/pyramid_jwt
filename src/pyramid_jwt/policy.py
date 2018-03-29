@@ -15,7 +15,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
     def __init__(self, private_key, public_key=None, algorithm='HS512',
             leeway=0, expiration=None, default_claims=None,
             http_header='Authorization', auth_type='JWT',
-            callback=None, json_encoder=None):
+            callback=None, json_encoder=None, audience=None,):
         self.private_key = private_key
         self.public_key = public_key if public_key is not None else private_key
         self.algorithm = algorithm
@@ -29,23 +29,31 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             self.expiration = expiration
         else:
             self.expiration = None
+        if audience:
+            self.audience = audience
+        else:
+            self.audience = None
         self.callback = callback
         self.json_encoder = json_encoder
 
-    def create_token(self, principal, expiration=None, **claims):
+    def create_token(self, principal, expiration=None, audience=None, **claims):
         payload = self.default_claims.copy()
         payload.update(claims)
         payload['sub'] = principal
         payload['iat'] = iat = datetime.datetime.utcnow()
         expiration = expiration or self.expiration
+        audience = audience or self.audience
         if expiration:
             if not isinstance(expiration, datetime.timedelta):
                     expiration = datetime.timedelta(seconds=expiration)
             payload['exp'] = iat + expiration
+        if audience:
+            payload['aud'] = audience
         token = jwt.encode(payload, self.private_key, algorithm=self.algorithm, json_encoder=self.json_encoder)
         if not isinstance(token, str):  # Python3 unicode madness
             token = token.decode('ascii')
         return token
+
 
     def get_claims(self, request):
         if self.http_header == 'Authorization':
@@ -62,11 +70,13 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         if not token:
             return {}
         try:
-            claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm], leeway=self.leeway)
+            claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
+                                leeway=self.leeway, audience=self.audience)
+            return claims
         except jwt.InvalidTokenError as e:
             log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
             return {}
-        return claims
+
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')

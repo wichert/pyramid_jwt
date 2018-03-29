@@ -29,6 +29,16 @@ with a `JWT` scheme to retrieve tokens. Using another HTTP header is trivial:
 
     config.set_jwt_authentication_policy('secret', http_header='X-My-Header')
 
+If your application needs to decode tokens which contain an `Audience <http://pyjwt.readthedocs.io/en/latest/usage.html?highlight=decode#audience-claim-aud>`_ claim you can extend this with:
+
+.. code-block:: python
+
+    config.set_jwt_authentication_policy('secret', 
+                                        auth_type='Bearer',
+                                        callback=add_role_principals,
+                                        audience="example.org")
+
+
 To make creating valid tokens easier a new ``create_jwt_token`` method is
 added to the request. You can use this in your view to create tokens. A simple
 authentication view for a REST backend could look something like this:
@@ -156,6 +166,8 @@ You can either set this in your .ini-file, or pass/override them directly to the
 +--------------+-----------------+---------------+--------------------------------------------+
 | expiration   | jwt.expiration  |               | Number of seconds (or a datetime.timedelta |
 |              |                 |               | instance) before a token expires.          |
++--------------+-----------------+---------------+--------------------------------------------+
+| audience     | jwt.audience    |               | Proposed audience for the token            |
 +--------------+-----------------+---------------+--------------------------------------------+
 | leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
 |              |                 |               | expired before it is rejected.             |
