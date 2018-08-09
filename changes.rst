@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.4 - August 9, 2018
+--------------------
+
+- `Pull request #21 <https://github.com/wichert/pyramid_jwt/pull/21>`_:
+  add support for JWT aud claims, from `Luke Crooks
+  <https://github.com/crooksey>`_.
+
 1.3 - March 20, 2018
 ---------------------
 
