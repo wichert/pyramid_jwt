@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.4.1 - August 10, 2018
+-----------------------
+
+- `Pull request #23 <https://github.com/wichert/pyramid_jwt/pull/21>`_:
+  Allow specifying the audience in the app configuration, from `John Stevens II
+  <https://github.com/jstevensfit>`_.
+
+
 1.4 - August 9, 2018
 --------------------
 
