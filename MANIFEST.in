@@ -1,2 +1,6 @@
 include *.rst
+include *.txt
+include .coveragerc
+include LICENSE
 recursive-include tests *.py
+recursive-include docs *.rst
