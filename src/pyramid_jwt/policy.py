@@ -1,5 +1,4 @@
 import datetime
-import logging
 import warnings
 import jwt
 from zope.interface import implementer
@@ -7,8 +6,12 @@ from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.interfaces import IAuthenticationPolicy
 
 
-log = logging.getLogger('pyramid_jwt')
 marker = []
+
+
+class JWTAuthenticationWarning(UserWarning):
+    pass
+
 
 @implementer(IAuthenticationPolicy)
 class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
@@ -54,7 +57,6 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = token.decode('ascii')
         return token
 
-
     def get_claims(self, request):
         if self.http_header == 'Authorization':
             try:
@@ -74,9 +76,8 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
                                 leeway=self.leeway, audience=self.audience)
             return claims
         except jwt.InvalidTokenError as e:
-            log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
+            warnings.warn('Invalid JWT token from %s: %s'.format(request.remote_addr, e), JWTAuthenticationWarning)
             return {}
-
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')
@@ -84,13 +85,13 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
     def remember(self, request, principal, **kw):
         warnings.warn(
             'JWT tokens need to be returned by an API. Using remember() '
-            'has no effect.',
+            'has no effect.', JWTAuthenticationWarning,
             stacklevel=3)
         return []
 
     def forget(self, request):
         warnings.warn(
             'JWT tokens are managed by API (users) manually. Using forget() '
-            'has no effect.',
+            'has no effect.', JWTAuthenticationWarning,
             stacklevel=3)
         return []

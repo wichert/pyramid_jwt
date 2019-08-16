@@ -8,7 +8,7 @@ from pyramid.testing import testConfig
 from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid_jwt.policy import JWTAuthenticationPolicy
+from pyramid_jwt.policy import JWTAuthenticationPolicy, JWTAuthenticationWarning
 import uuid
 import pytest
 from json.encoder import JSONEncoder
@@ -46,8 +46,9 @@ def test_audience_invalid():
     token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.com')
     request = Request.blank('/')
     request.authorization = ('JWT', token)
-    jwt_claims = policy.get_claims(request)
-    assert jwt_claims == {}
+    with pytest.warns(JWTAuthenticationWarning):
+        jwt_claims = policy.get_claims(request)
+        assert jwt_claims == {}
 
 
 def test_algorithm_unsupported():
@@ -94,7 +95,8 @@ def test_expired_token():
     policy = JWTAuthenticationPolicy('secret', expiration=-1)
     request = Request.blank('/')
     request.authorization = ('JWT', policy.create_token(15))
-    request.jwt_claims = policy.get_claims(request)
+    with pytest.warns(JWTAuthenticationWarning):
+        request.jwt_claims = policy.get_claims(request)
     assert policy.unauthenticated_userid(request) is None
     policy.leeway = 5
     request.jwt_claims = policy.get_claims(request)
@@ -110,7 +112,8 @@ def test_dynamic_expired_token():
 
     policy = JWTAuthenticationPolicy('secret')
     request.authorization = ('JWT', policy.create_token(15, expiration=-1))
-    request.jwt_claims = policy.get_claims(request)
+    with pytest.warns(JWTAuthenticationWarning):
+        request.jwt_claims = policy.get_claims(request)
     assert policy.unauthenticated_userid(request) is None
     request.authorization = ('JWT', policy.create_token(15))
     request.jwt_claims = policy.get_claims(request)
