@@ -183,6 +183,27 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             path=None
         )
 
+    @staticmethod
+    def make_from(policy, **kwargs):
+        if not isinstance(policy, JWTAuthenticationPolicy):
+            pol_type = policy.__class__.__name__
+            raise AttributeError('Invalid policy type %s' % pol_type)
+
+        return JWTTokenAuthenticationPolicy(
+            private_key=policy.private_key,
+            public_key=policy.public_key,
+            algorithm=policy.algorithm,
+            leeway=policy.leeway,
+            expiration=policy.expiration,
+            default_claims=policy.default_claims,
+            http_header=policy.http_header,
+            auth_type=policy.auth_type,
+            callback=policy.callback,
+            json_encoder=policy.json_encoder,
+            audience=policy.audience,
+            **kwargs
+        )
+
     def _get_cookies(self, request, value, max_age=None):
         profile = self.cookie_profile(request)
 
