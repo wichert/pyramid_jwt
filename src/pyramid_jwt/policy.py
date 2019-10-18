@@ -242,7 +242,6 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         return claims
 
     def _handle_reissue(self, request, claims):
-        import pdb; pdb.set_trace()
         if not request or not claims:
             raise AttributeError(
                 "Cannot handle JWT reissue: insufficient arguments")
@@ -261,7 +260,8 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             return
 
         extra_claims = dict(
-            filter(lambda k, v: k not in self.jwt_std_claims, claims.items())
+            filter(lambda item: item[0] not in self.jwt_std_claims,
+                   claims.items())
         )
         headers = self.remember(request, principal, **extra_claims)
 
@@ -269,5 +269,5 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             if not hasattr(request, '_jwt_cookie_reissue_revoked'):
                 for k, v in headers:
                     response.headerlist.append((k, v))
-            request.add_response_callback(reissiue_jwt_cookie)
-            request._jwt_cookie_reissued = True
+        request.add_response_callback(reissiue_jwt_cookie)
+        request._jwt_cookie_reissued = True
