@@ -10,7 +10,7 @@ def login_view(request):
     return {'token': request.create_jwt_token(1)}
 
 
-def secure_view(request):
+def secure_view(_):
     return 'OK'
 
 
@@ -19,7 +19,7 @@ class Root:
         (Allow, Authenticated, ('read',)),
     ]
 
-    def __init__(self, request):
+    def __init__(self, _):
         pass
 
 
@@ -35,7 +35,7 @@ def app():
     config.add_view(login_view, route_name='login', renderer='json')
     config.add_route('secure', '/secure')
     config.add_view(secure_view, route_name='secure', renderer='string',
-         permission='read')
+                    permission='read')
     app = config.make_wsgi_app()
     return TestApp(app)
 

@@ -1,7 +1,7 @@
 import os
 import sys
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
+from setuptools.command.test import test as test_command
 
 version = '1.4.1'
 
@@ -16,11 +16,12 @@ tests_require = [
 ]
 
 
-class PyTest(TestCommand):
+class PyTest(test_command):
+    test_args = ['tests']
+    test_suite = True
+
     def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['tests']
-        self.test_suite = True
+        test_command.finalize_options(self)
 
     def run_tests(self):
         # import here, cause outside the eggs aren't loaded
@@ -29,12 +30,17 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
+def get_readme():
+    readme = open('README.rst').read()
+    example = open(os.path.join('docs', 'example.rst')).read()
+    changes = open('changes.rst').read()
+    return "%s\n%s\n%s" % (readme, example, changes)
+
+
 setup(name='pyramid_jwt',
       version=version,
       description='JWT authentication policy for Pyramid',
-      long_description=open('README.rst').read() + '\n' +
-              open(os.path.join('docs', 'example.rst')).read() + '\n' +
-              open('changes.rst').read(),
+      long_description=get_readme(),
       classifiers=[
           'Intended Audience :: Developers',
           'License :: DFSG approved',
