@@ -5,6 +5,7 @@ from json import JSONEncoder
 
 import jwt
 from pyramid.renderers import JSON
+from webob.cookies import CookieProfile
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.interfaces import IAuthenticationPolicy, IRendererFactory
@@ -110,6 +111,9 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             token = request.headers.get(self.http_header)
         if not token:
             return {}
+        return self.jwt_decode(request, token)
+
+    def jwt_decode(self, request, token):
         try:
             claims = jwt.decode(
                 token,
@@ -141,3 +145,58 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             stacklevel=3,
         )
         return []
+
+
+@implementer(IAuthenticationPolicy)
+class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
+    def __init__(self, private_key, public_key=None, algorithm='HS512',
+                 leeway=0, expiration=None, default_claims=None,
+                 http_header='Authorization', auth_type='JWT',
+                 callback=None, json_encoder=None, audience=None,
+                 cookie_name='Authorization', https_only=True,
+                 include_ip=True):
+        super(JWTTokenAuthenticationPolicy, self).__init__(
+            private_key, public_key, algorithm,
+            leeway, expiration, default_claims,
+            http_header, auth_type,
+            callback, json_encoder, audience)
+
+        self.https_only = https_only
+        self.include_ip = include_ip
+        self.cookie_name = cookie_name
+        self.max_age = self.expiration and self.expiration.total_seconds()
+
+        self.cookie_profile = CookieProfile(
+            cookie_name=self.cookie_name,
+            secure=self.https_only,
+            max_age=self.max_age,
+            httponly=True,
+            path=None
+        )
+
+    def _get_cookies(self, request, value, max_age=None):
+        profile = self.cookie_profile(request)
+
+        kw = {'domains': [request.domain]}
+        if max_age is not None:
+            kw['max_age'] = max_age
+
+        headers = profile.get_headers(value, **kw)
+        return headers
+
+    def remember(self, request, principal, **kw):
+        token = self.create_token(principal, self.expiration,
+                                  self.audience, **kw)
+        return self._get_cookies(request, token, self.max_age)
+
+    def forget(self, request):
+        return self._get_cookies(request, None)
+
+    def get_claims(self, request):
+        profile = self.cookie_profile.bind(request)
+        cookie = profile.get_value()
+
+        if cookie is None:
+            return {}
+
+        return self.jwt_decode(request, cookie)
