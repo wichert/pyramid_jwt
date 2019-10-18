@@ -64,7 +64,36 @@ def test_cookie_decode(request, principal):
 
     header, cookie = policy.remember(request, principal).pop()
     name, value = cookie.split('=', 1)
-    request.cookies = {name: value.split(';', 1)[0]}
+
+    value, _ = value.split(';', 1)
+    request.cookies = {name: value}
 
     claims = policy.get_claims(request)
     assert claims['sub'] == principal
+
+
+def test_cookie_max_age(request, principal):
+    policy = JWTTokenAuthenticationPolicy('secret', cookie_name='auth',
+                                          expiration=100)
+    _, cookie = policy.remember(request, principal).pop()
+    _, value = cookie.split('=', 1)
+
+    _, meta = value.split(';', 1)
+    assert 'Max-Age=100' in meta
+    assert "expires" in meta
+
+
+@pytest.mark.freeze_time
+def test_expired_token(request, principal, freezer):
+    policy = JWTTokenAuthenticationPolicy('secret', cookie_name='auth',
+                                          expiration=1)
+    _, cookie = policy.remember(request, principal).pop()
+    name, value = cookie.split('=', 1)
+
+    freezer.tick(delta=2)
+
+    value, _ = value.split(';', 1)
+    request.cookies = {name: value}
+    claims = policy.get_claims(request)
+
+    assert claims == {}

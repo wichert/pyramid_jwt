@@ -12,7 +12,6 @@ def includeme(config):
         action_wrap=True)
 
 
-
 def create_jwt_authentication_policy(
     config,
     private_key=None,
