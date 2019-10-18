@@ -1,5 +1,6 @@
 import datetime
 import logging
+import time
 import warnings
 from json import JSONEncoder
 
@@ -73,6 +74,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         if json_encoder is None:
             json_encoder = json_encoder_factory
         self.json_encoder = json_encoder
+        self.jwt_std_claims = ('sub', 'iat', 'exp', 'aud')
 
     def create_token(self, principal, expiration=None, audience=None, **claims):
         payload = self.default_claims.copy()
@@ -147,14 +149,18 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         return []
 
 
+class ReissueError(Exception):
+    pass
+
+
 @implementer(IAuthenticationPolicy)
 class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
     def __init__(self, private_key, public_key=None, algorithm='HS512',
                  leeway=0, expiration=None, default_claims=None,
                  http_header='Authorization', auth_type='JWT',
                  callback=None, json_encoder=None, audience=None,
-                 cookie_name='Authorization', https_only=True,
-                 include_ip=True):
+                 cookie_name='Authorization', https_only=False,
+                 reissue_time=None):
         super(JWTTokenAuthenticationPolicy, self).__init__(
             private_key, public_key, algorithm,
             leeway, expiration, default_claims,
@@ -162,9 +168,12 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             callback, json_encoder, audience)
 
         self.https_only = https_only
-        self.include_ip = include_ip
         self.cookie_name = cookie_name
         self.max_age = self.expiration and self.expiration.total_seconds()
+
+        if reissue_time and isinstance(reissue_time, datetime.timedelta):
+            reissue_time = reissue_time.total_seconds()
+        self.reissue_time = reissue_time
 
         self.cookie_profile = CookieProfile(
             cookie_name=self.cookie_name,
@@ -187,6 +196,10 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
     def remember(self, request, principal, **kw):
         token = self.create_token(principal, self.expiration,
                                   self.audience, **kw)
+
+        if hasattr(request, '_jwt_cookie_reissued'):
+            request._jwt_cookie_reissue_revoked = True
+
         return self._get_cookies(request, token, self.max_age)
 
     def forget(self, request):
@@ -196,7 +209,44 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         profile = self.cookie_profile.bind(request)
         cookie = profile.get_value()
 
+        reissue = self.reissue_time is not None
+
         if cookie is None:
             return {}
 
-        return self.jwt_decode(request, cookie)
+        claims = self.jwt_decode(request, cookie)
+
+        if reissue and not hasattr(request, '_jwt_cookie_reissued'):
+            self._handle_reissue(request, claims)
+        return claims
+
+    def _handle_reissue(self, request, claims):
+        import pdb; pdb.set_trace()
+        if not request or not claims:
+            raise AttributeError(
+                "Cannot handle JWT reissue: insufficient arguments")
+
+        if 'iat' not in claims:
+            raise ReissueError("Token claim's is missing IAT")
+        if 'sub' not in claims:
+            raise ReissueError("Token claim's is missing SUB")
+
+        token_dt = claims['iat']
+        principal = claims['sub']
+        now = time.time()
+
+        if now < token_dt + self.reissue_time:
+            # Token not yet eligible for reissuing
+            return
+
+        extra_claims = dict(
+            filter(lambda k, v: k not in self.jwt_std_claims, claims.items())
+        )
+        headers = self.remember(request, principal, **extra_claims)
+
+        def reissiue_jwt_cookie(request, response):
+            if not hasattr(request, '_jwt_cookie_reissue_revoked'):
+                for k, v in headers:
+                    response.headerlist.append((k, v))
+            request.add_response_callback(reissiue_jwt_cookie)
+            request._jwt_cookie_reissued = True
