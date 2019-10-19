@@ -7,4 +7,6 @@ python:
   - pypy
 install:
   - pip install -e '.[tests]'
-script: py.test tests
+script:
+  - py.test tests
+  - flake8
