@@ -167,8 +167,9 @@ def test_custom_json_encoder():
         'secret', json_encoder=MyCustomJsonEncoder)
 
     request = Request.blank('/')
-    request.authorization = ('JWT', policy.create_token(principal_id,
-                                                        uid_value=claim_value))
+    request.authorization = ('JWT', policy.create_token(
+        principal_id, uuid_value=claim_value)
+    )
     request.jwt_claims = policy.get_claims(request)
     assert policy.unauthenticated_userid(request) == str(principal_id)
     assert request.jwt_claims.get('uuid_value') == str(claim_value)
