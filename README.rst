@@ -167,7 +167,9 @@ You can either set this in your .ini-file, or pass/override them directly to the
 | expiration   | jwt.expiration  |               | Number of seconds (or a datetime.timedelta |
 |              |                 |               | instance) before a token expires.          |
 +--------------+-----------------+---------------+--------------------------------------------+
-| audience     | jwt.audience    |               | Proposed audience for the token            |
+| audience     | jwt.audience    |               | Proposed audience for the token. Multiple  |
+|              |                 |               | audiences accepted via comma separated     |
+|              |                 |               | string. e.g. 'example.org,example2.org'     |
 +--------------+-----------------+---------------+--------------------------------------------+
 | leeway       | jwt.leeway      | 0             | Number of seconds a token is allowed to be |
 |              |                 |               | expired before it is rejected.             |
