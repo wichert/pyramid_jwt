@@ -48,7 +48,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
                     expiration = datetime.timedelta(seconds=expiration)
             payload['exp'] = iat + expiration
         if audience:
-            payload['aud'] = audience
+            payload['aud'] = self._aud_string_to_list(audience)
         token = jwt.encode(payload, self.private_key, algorithm=self.algorithm, json_encoder=self.json_encoder)
         if not isinstance(token, str):  # Python3 unicode madness
             token = token.decode('ascii')
@@ -71,12 +71,11 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             return {}
         try:
             claims = jwt.decode(token, self.public_key, algorithms=[self.algorithm],
-                                leeway=self.leeway, audience=self.audience)
+                                leeway=self.leeway, audience=self._aud_string_to_list(self.audience))
             return claims
         except jwt.InvalidTokenError as e:
             log.warning('Invalid JWT token from %s: %s', request.remote_addr, e)
             return {}
-
 
     def unauthenticated_userid(self, request):
         return request.jwt_claims.get('sub')
@@ -94,3 +93,15 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
             'has no effect.',
             stacklevel=3)
         return []
+
+    def _aud_string_to_list(self, audience):
+        """
+        Splits the audience variable into a
+        list to handle multiple audiences.
+        :param audience: Comma separated list of audiences
+        :return: List of one or more audiences
+        """
+        if audience is None:
+            return None
+        else:
+            return audience.split(',')

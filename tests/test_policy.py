@@ -39,10 +39,48 @@ def test_audience_valid():
     request = Request.blank('/')
     request.authorization = ('JWT', token)
     jwt_claims = policy.get_claims(request)
-    assert jwt_claims['aud'] == 'example.org'
+    assert jwt_claims['aud'] == ['example.org']
+
+
+def test_multiple_audience_valid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org,example2.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.org,example2.org')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    for key in ('example.org', 'example2.org'):
+        assert key in jwt_claims['aud']
+
+
+def test_multiple_to_one_audience_valid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org,example2.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.org')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    assert jwt_claims['aud'] == ['example.org']
+
 
 def test_audience_invalid():
     policy = JWTAuthenticationPolicy('secret', audience='example.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.com')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    assert jwt_claims == {}
+
+
+def test_multiple_audience_invalid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org,example2.org')
+    token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.com,example2.com')
+    request = Request.blank('/')
+    request.authorization = ('JWT', token)
+    jwt_claims = policy.get_claims(request)
+    assert jwt_claims == {}
+
+
+def test_multiple_to_one_audience_invalid():
+    policy = JWTAuthenticationPolicy('secret', audience='example.org,example2.org')
     token = policy.create_token(15, name=u'Jöhn', admin=True, audience='example.com')
     request = Request.blank('/')
     request.authorization = ('JWT', token)
