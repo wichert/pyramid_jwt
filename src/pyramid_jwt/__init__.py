@@ -1,4 +1,5 @@
 from .policy import JWTAuthenticationPolicy
+from pyramid.renderers import json_renderer_factory
 
 
 def includeme(config):
@@ -17,7 +18,7 @@ def create_jwt_authentication_policy(
     http_header=None,
     auth_type=None,
     callback=None,
-    json_encoder=None,
+    json_encoder=json_renderer_factory,
     audience=None,
 ):
     settings = config.get_settings()
@@ -60,7 +61,7 @@ def set_jwt_authentication_policy(
     http_header=None,
     auth_type=None,
     callback=None,
-    json_encoder=None,
+    json_encoder=json_renderer_factory,
     audience=None,
 ):
     policy = create_jwt_authentication_policy(

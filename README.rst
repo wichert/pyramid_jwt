@@ -177,8 +177,8 @@ You can either set this in your .ini-file, or pass/override them directly to the
 | auth_type    | jwt.auth_type   | JWT           | Authentication type used in Authorization  |
 |              |                 |               | header. Unused for other HTTP headers.     |
 +--------------+-----------------+---------------+--------------------------------------------+
-| json_encoder |                 | None          | A subclass of JSONEncoder to be used       |
-|              |                 |               | to encode principal and claims infos.      |
+| json_encoder |                 | Pyramid       | A subclass of JSONEncoder to be used       |
+|              |                 | JSONencoder   | to encode principal and claims infos.      |
 +--------------+-----------------+---------------+--------------------------------------------+
 
 Pyramid JWT example use cases
