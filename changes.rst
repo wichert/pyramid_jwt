@@ -1,6 +1,31 @@
 Changelog
 =========
 
+1.4.1 - August 10, 2018
+-----------------------
+
+- `Pull request #23 <https://github.com/wichert/pyramid_jwt/pull/21>`_:
+  Allow specifying the audience in the app configuration, from `John Stevens II
+  <https://github.com/jstevensfit>`_.
+
+
+1.4 - August 9, 2018
+--------------------
+
+- `Pull request #21 <https://github.com/wichert/pyramid_jwt/pull/21>`_:
+  add support for JWT aud claims, from `Luke Crooks
+  <https://github.com/crooksey>`_.
+
+1.3 - March 20, 2018
+---------------------
+
+- `Issue #20 <https://github.com/wichert/pyramid_jwt/issues/20>`_:
+  Fix handling of public keys.
+- `Pull request #17 <https://github.com/wichert/pyramid_jwt/pull/17>`_:
+  a lot of documentation improvements from `Luke Crooks
+  <https://github.com/crooksey>`_.
+
+
 1.2 - May 25, 2017
 ------------------
 

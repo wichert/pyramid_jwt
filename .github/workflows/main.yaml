@@ -1,0 +1,53 @@
+on:
+  push:
+    paths:
+      - '*.py'
+      - .github/workflows/main.yaml
+    branches:
+      - '*'
+    tags:
+      - '!*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python: ["2.7", "3.6", "3.7"]
+
+    name: Test Python ${{ matrix.python }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -e .[testing]
+          python -m pip install pytest
+
+      - name: Run tests
+        run: py.test
+
+  style:
+    runs-on: ubuntu-latest
+    name: Code style
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install black
+        run: python -m pip install black
+
+      - name: Check code style
+        run: black --check .
