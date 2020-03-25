@@ -33,3 +33,21 @@ jobs:
 
       - name: Run tests
         run: py.test
+
+  style:
+    runs-on: ubuntu-latest
+    name: Code style
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install black
+        run: python -m pip install black
+
+      - name: Check code style
+        run: black --check .
