@@ -159,7 +159,7 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
                  leeway=0, expiration=None, default_claims=None,
                  http_header='Authorization', auth_type='JWT',
                  callback=None, json_encoder=None, audience=None,
-                 cookie_name='Authorization', https_only=False,
+                 cookie_name='Authorization', https_only=True,
                  reissue_time=None):
         super(JWTTokenAuthenticationPolicy, self).__init__(
             private_key, public_key, algorithm,
