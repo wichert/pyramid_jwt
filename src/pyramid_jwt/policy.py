@@ -187,7 +187,7 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
     def make_from(policy, **kwargs):
         if not isinstance(policy, JWTAuthenticationPolicy):
             pol_type = policy.__class__.__name__
-            raise AttributeError('Invalid policy type %s' % pol_type)
+            raise TypeError('Invalid policy type %s' % pol_type)
 
         return JWTTokenAuthenticationPolicy(
             private_key=policy.private_key,
