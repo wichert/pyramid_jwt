@@ -190,7 +190,7 @@ def test_cookie_reiisue(cookie_app, freezer):
     cookie_app.get('/login')
     token = cookie_app.cookies.get('Token')
 
-    freezer.tick(delta=5)
+    freezer.tick(delta=4)
 
     cookie_app.get('/secure')
     other_token = cookie_app.cookies.get('Token')
