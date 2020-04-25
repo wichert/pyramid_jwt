@@ -265,9 +265,9 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         )
         headers = self.remember(request, principal, **extra_claims)
 
-        def reissiue_jwt_cookie(request, response):
+        def reissue_jwt_cookie(request, response):
             if not hasattr(request, '_jwt_cookie_reissue_revoked'):
                 for k, v in headers:
                     response.headerlist.append((k, v))
-        request.add_response_callback(reissiue_jwt_cookie)
+        request.add_response_callback(reissue_jwt_cookie)
         request._jwt_cookie_reissued = True
