@@ -204,10 +204,12 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             **kwargs
         )
 
-    def _get_cookies(self, request, value, max_age=None):
+    def _get_cookies(self, request, value, max_age=None, domains=None):
         profile = self.cookie_profile(request)
+        if not domains:
+            domains = [request.domain]
 
-        kw = {'domains': [request.domain]}
+        kw = {'domains': domains}
         if max_age is not None:
             kw['max_age'] = max_age
 
@@ -221,7 +223,9 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         if hasattr(request, '_jwt_cookie_reissued'):
             request._jwt_cookie_reissue_revoked = True
 
-        return self._get_cookies(request, token, self.max_age)
+        domains = kw.get('domains')
+
+        return self._get_cookies(request, token, self.max_age, domains=domains)
 
     def forget(self, request):
         return self._get_cookies(request, None)
