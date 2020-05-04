@@ -1,12 +1,4 @@
-on:
-  push:
-    paths:
-      - '*.py'
-      - .github/workflows/main.yaml
-    branches:
-      - '*'
-    tags:
-      - '!*'
+on: push
 
 jobs:
   test:
