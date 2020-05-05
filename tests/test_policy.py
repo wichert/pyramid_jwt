@@ -8,7 +8,8 @@ from pyramid.testing import testConfig
 from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid_jwt.policy import JWTAuthenticationPolicy
+from pyramid_jwt.policy import JWTAuthenticationPolicy, \
+    PyramidJSONEncoderFactory
 import uuid
 import pytest
 from json.encoder import JSONEncoder
@@ -144,6 +145,12 @@ def test_forget_warning():
     assert issubclass(w[-1].category, UserWarning)
     assert "JWT tokens" in str(w[-1].message)
     assert w[-1].filename.endswith("test_policy.py")
+
+
+def test_default_json_encoder():
+    policy = JWTAuthenticationPolicy("secret")
+    assert isinstance(policy.json_encoder, PyramidJSONEncoderFactory)
+    assert isinstance(policy.json_encoder(), JSONEncoder)
 
 
 class MyCustomJsonEncoder(JSONEncoder):
