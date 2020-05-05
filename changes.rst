@@ -4,6 +4,8 @@ Changelog
 1.5.0 - May 50, 2020
 --------------------
 
+- Drop official support for Python 2.7.
+
 - Use GitHub actions for CI and automated releases.
 
 - `Pull request #42 <https://github.com/wichert/pyramid_jwt/pull/42>`_:
