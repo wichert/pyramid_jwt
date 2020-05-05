@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.5.0 - May 50, 2020
+--------------------
+
+- Use GitHub actions for CI and automated releases.
+
+- `Pull request #42 <https://github.com/wichert/pyramid_jwt/pull/42>`_:
+  use the JSON encoder from Pyramid as default.
+  From `phrfpeixoto <https://github.com/phrfpeixoto>`_
+
 1.4.1 - August 10, 2018
 -----------------------
 
