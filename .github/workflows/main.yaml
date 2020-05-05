@@ -43,3 +43,55 @@ jobs:
 
       - name: Check code style
         run: black --check .
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    name: Release
+    needs: [ test, style ]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install wheel
+        run: python -m pip install wheel --user
+
+      - name: Insert version number
+        run: |
+          version=$(echo $GITHUB_REF | cut -d/ -f3)
+          sed -ie "/^version/s/=.*/= \"$version\"/" setup.py
+
+      - name: Generate changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
+      - name: Build a binary wheel and a source tarball
+        run: python setup.py sdist bdist_wheel
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ${{ steps.Changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
