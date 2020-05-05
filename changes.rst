@@ -1,8 +1,14 @@
 Changelog
 =========
 
-1.5.0 - May 50, 2020
---------------------
+1.5.1 - May 5, 2020
+-------------------
+
+- Fix release versioning error.
+
+
+1.5.0 - May 5, 2020
+-------------------
 
 - Drop official support for Python 2.7.
 
