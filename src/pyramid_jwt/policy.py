@@ -22,13 +22,13 @@ class PyramidJSONEncoderFactory(JSON):
         json_renderer = None
         if self.registry is not None:
             json_renderer = self.registry.queryUtility(
-                IRendererFactory, 'json', default=JSONEncoder
+                IRendererFactory, "json", default=JSONEncoder
             )
 
-        request = kwargs.get('request')
-        if not kwargs.get('default') and isinstance(json_renderer, JSON):
+        request = kwargs.get("request")
+        if not kwargs.get("default") and isinstance(json_renderer, JSON):
             self.components = json_renderer.components
-            kwargs['default'] = self._make_default(request)
+            kwargs["default"] = self._make_default(request)
         return JSONEncoder(*args, **kwargs)
 
 

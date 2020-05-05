@@ -8,8 +8,7 @@ from pyramid.testing import testConfig
 from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid_jwt.policy import JWTAuthenticationPolicy, \
-    PyramidJSONEncoderFactory
+from pyramid_jwt.policy import JWTAuthenticationPolicy, PyramidJSONEncoderFactory
 import uuid
 import pytest
 from json.encoder import JSONEncoder

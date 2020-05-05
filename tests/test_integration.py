@@ -39,9 +39,7 @@ class Serializable(object):
 
 def extra_claims(request):
     return {
-        "token": request.create_jwt_token(
-            principal=1, extra_claim=NonSerializable()
-        )
+        "token": request.create_jwt_token(principal=1, extra_claim=NonSerializable())
     }
 
 
@@ -99,13 +97,14 @@ def test_pyramid_json_encoder_with_adapter(app):
 
     def serialize_anyclass(obj, request):
         return obj.__class__.__name__
+
     json_renderer_factory.add_adapter(NonSerializable, serialize_anyclass)
 
     response = app.get("/extra_claims")
     token = str(response.json_body["token"])
 
     response = app.get("/dump_claims", headers={"X-Token": token})
-    assert response.json_body['extra_claim'] == 'NonSerializable'
+    assert response.json_body["extra_claim"] == "NonSerializable"
 
 
 def test_pyramid_custom_json_encoder(app_config: Configurator):
@@ -114,6 +113,7 @@ def test_pyramid_custom_json_encoder(app_config: Configurator):
 
     def serialize_anyclass(obj, request):
         assert False  # This asserts this method will not be called
+
     json_renderer_factory.add_adapter(NonSerializable, serialize_anyclass)
 
     def other_serializer(obj, request):
@@ -121,11 +121,11 @@ def test_pyramid_custom_json_encoder(app_config: Configurator):
 
     my_renderer = JSON()
     my_renderer.add_adapter(NonSerializable, other_serializer)
-    app_config.add_renderer('json', my_renderer)
+    app_config.add_renderer("json", my_renderer)
     app = TestApp(app_config.make_wsgi_app())
 
     response = app.get("/extra_claims")
     token = str(response.json_body["token"])
 
     response = app.get("/dump_claims", headers={"X-Token": token})
-    assert response.json_body['extra_claim'] == 'other_serializer'
+    assert response.json_body["extra_claim"] == "other_serializer"
