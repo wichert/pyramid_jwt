@@ -1,14 +1,38 @@
 import datetime
 import logging
 import warnings
+from json import JSONEncoder
+
 import jwt
+from pyramid.renderers import JSON
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
-from pyramid.interfaces import IAuthenticationPolicy
-
+from pyramid.interfaces import IAuthenticationPolicy, IRendererFactory
 
 log = logging.getLogger("pyramid_jwt")
 marker = []
+
+
+class PyramidJSONEncoderFactory(JSON):
+    def __init__(self, pyramid_registry=None, **kw):
+        super().__init__(**kw)
+        self.registry = pyramid_registry
+
+    def __call__(self, *args, **kwargs):
+        json_renderer = None
+        if self.registry is not None:
+            json_renderer = self.registry.queryUtility(
+                IRendererFactory, 'json', default=JSONEncoder
+            )
+
+        request = kwargs.get('request')
+        if not kwargs.get('default') and isinstance(json_renderer, JSON):
+            self.components = json_renderer.components
+            kwargs['default'] = self._make_default(request)
+        return JSONEncoder(*args, **kwargs)
+
+
+json_encoder_factory = PyramidJSONEncoderFactory(None)
 
 
 @implementer(IAuthenticationPolicy)
@@ -45,6 +69,8 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         else:
             self.audience = None
         self.callback = callback
+        if json_encoder is None:
+            json_encoder = json_encoder_factory
         self.json_encoder = json_encoder
 
     def create_token(self, principal, expiration=None, audience=None, **claims):

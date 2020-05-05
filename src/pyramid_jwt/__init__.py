@@ -1,7 +1,8 @@
-from .policy import JWTAuthenticationPolicy
+from .policy import JWTAuthenticationPolicy, json_encoder_factory
 
 
 def includeme(config):
+    json_encoder_factory.registry = config.registry
     config.add_directive(
         "set_jwt_authentication_policy", set_jwt_authentication_policy, action_wrap=True
     )
