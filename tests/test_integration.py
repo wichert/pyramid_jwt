@@ -101,11 +101,12 @@ def cookie_config(base_config):
         logout_cookie_view, route_name="logout", renderer="string", permission="read"
     )
 
-
     base_config.add_route("suspicious", "/suspicious")
     base_config.add_view(
-        suspicious_behaviour_view, route_name="suspicious",
-        renderer="string", permission="read"
+        suspicious_behaviour_view,
+        route_name="suspicious",
+        renderer="string",
+        permission="read",
     )
 
     # Enable JWT authentication on Cookies.

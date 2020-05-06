@@ -10,7 +10,11 @@ from pyramid.testing import testConfig
 from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid_jwt.policy import JWTAuthenticationPolicy, PyramidJSONEncoderFactory, JWTTokenAuthenticationPolicy
+from pyramid_jwt.policy import (
+    JWTAuthenticationPolicy,
+    PyramidJSONEncoderFactory,
+    JWTTokenAuthenticationPolicy,
+)
 import uuid
 import pytest
 from json.encoder import JSONEncoder
@@ -37,7 +41,7 @@ def test_minimal_roundtrip():
 
 def test_audience_valid():
     policy = JWTAuthenticationPolicy("secret", audience="example.org")
-    token = policy.create_token(15, name=u"Jöhn", admin=True, audience="example.org")
+    token = policy.create_token(15, name="Jöhn", admin=True, audience="example.org")
     request = Request.blank("/")
     request.authorization = ("JWT", token)
     jwt_claims = policy.get_claims(request)
@@ -46,7 +50,7 @@ def test_audience_valid():
 
 def test_audience_invalid():
     policy = JWTAuthenticationPolicy("secret", audience="example.org")
-    token = policy.create_token(15, name=u"Jöhn", admin=True, audience="example.com")
+    token = policy.create_token(15, name="Jöhn", admin=True, audience="example.com")
     request = Request.blank("/")
     request.authorization = ("JWT", token)
     jwt_claims = policy.get_claims(request)
@@ -56,16 +60,16 @@ def test_audience_invalid():
 def test_algorithm_unsupported():
     policy = JWTAuthenticationPolicy("secret", algorithm="SHA1")
     with pytest.raises(NotImplementedError):
-        token = policy.create_token(15, name=u"Jöhn", admin=True)
+        token = policy.create_token(15, name="Jöhn", admin=True)
 
 
 def test_extra_claims():
     policy = JWTAuthenticationPolicy("secret")
-    token = policy.create_token(15, name=u"Jöhn", admin=True)
+    token = policy.create_token(15, name="Jöhn", admin=True)
     request = Request.blank("/")
     request.authorization = ("JWT", token)
     jwt_claims = policy.get_claims(request)
-    assert jwt_claims["name"] == u"Jöhn"
+    assert jwt_claims["name"] == "Jöhn"
     assert jwt_claims["admin"]
 
 
@@ -206,7 +210,7 @@ def test_cookie_policy_remember():
     header, cookie = headers[0]
     assert header.lower() == "set-cookie"
 
-    chunks = cookie.split('; ')
+    chunks = cookie.split("; ")
     assert chunks[0].startswith(f"{policy.cookie_name}=")
 
     assert "HttpOnly" in chunks
@@ -221,12 +225,12 @@ def test_cookie_policy_forget():
     header, cookie = headers[0]
     assert header.lower() == "set-cookie"
 
-    chunks = cookie.split('; ')
-    cookie_values = [c for c in chunks if '=' in c]
+    chunks = cookie.split("; ")
+    cookie_values = [c for c in chunks if "=" in c]
     assert cookie_values[0].startswith(f"{policy.cookie_name}=")
 
     assert "Max-Age=0" in chunks
-    assert hasattr(request, '_jwt_cookie_reissue_revoked')
+    assert hasattr(request, "_jwt_cookie_reissue_revoked")
 
 
 def test_cookie_policy_custom_domain_list():
@@ -249,7 +253,7 @@ def test_insecure_cookie_policy():
     headers = policy.forget(request)
 
     _, cookie = headers[0]
-    chunks = cookie.split('; ')
+    chunks = cookie.split("; ")
 
     assert "secure" not in chunks
 
@@ -260,7 +264,7 @@ def test_insecure_cookie_policy():
     headers = policy.forget(request)
 
     _, cookie = headers[0]
-    chunks = cookie.split('; ')
+    chunks = cookie.split("; ")
 
     assert "secure" not in chunks
 
@@ -273,6 +277,6 @@ def test_cookie_policy_max_age():
     headers = policy.forget(request)
 
     _, cookie = headers[0]
-    chunks = cookie.split('; ')
+    chunks = cookie.split("; ")
 
     assert "Max-Age=10" not in chunks
