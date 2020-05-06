@@ -74,7 +74,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         if json_encoder is None:
             json_encoder = json_encoder_factory
         self.json_encoder = json_encoder
-        self.jwt_std_claims = ('sub', 'iat', 'exp', 'aud')
+        self.jwt_std_claims = ("sub", "iat", "exp", "aud")
 
     def create_token(self, principal, expiration=None, audience=None, **claims):
         payload = self.default_claims.copy()
@@ -155,17 +155,36 @@ class ReissueError(Exception):
 
 @implementer(IAuthenticationPolicy)
 class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
-    def __init__(self, private_key, public_key=None, algorithm='HS512',
-                 leeway=0, expiration=None, default_claims=None,
-                 http_header='Authorization', auth_type='JWT',
-                 callback=None, json_encoder=None, audience=None,
-                 cookie_name='Authorization', https_only=True,
-                 reissue_time=None):
+    def __init__(
+        self,
+        private_key,
+        public_key=None,
+        algorithm="HS512",
+        leeway=0,
+        expiration=None,
+        default_claims=None,
+        http_header="Authorization",
+        auth_type="JWT",
+        callback=None,
+        json_encoder=None,
+        audience=None,
+        cookie_name="Authorization",
+        https_only=True,
+        reissue_time=None,
+    ):
         super(JWTTokenAuthenticationPolicy, self).__init__(
-            private_key, public_key, algorithm,
-            leeway, expiration, default_claims,
-            http_header, auth_type,
-            callback, json_encoder, audience)
+            private_key,
+            public_key,
+            algorithm,
+            leeway,
+            expiration,
+            default_claims,
+            http_header,
+            auth_type,
+            callback,
+            json_encoder,
+            audience,
+        )
 
         self.https_only = https_only
         self.cookie_name = cookie_name
@@ -180,14 +199,14 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             secure=self.https_only,
             max_age=self.max_age,
             httponly=True,
-            path=None
+            path=None,
         )
 
     @staticmethod
     def make_from(policy, **kwargs):
         if not isinstance(policy, JWTAuthenticationPolicy):
             pol_type = policy.__class__.__name__
-            raise TypeError('Invalid policy type %s' % pol_type)
+            raise TypeError("Invalid policy type %s" % pol_type)
 
         return JWTTokenAuthenticationPolicy(
             private_key=policy.private_key,
@@ -209,21 +228,20 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         if not domains:
             domains = [request.domain]
 
-        kw = {'domains': domains}
+        kw = {"domains": domains}
         if max_age is not None:
-            kw['max_age'] = max_age
+            kw["max_age"] = max_age
 
         headers = profile.get_headers(value, **kw)
         return headers
 
     def remember(self, request, principal, **kw):
-        token = self.create_token(principal, self.expiration,
-                                  self.audience, **kw)
+        token = self.create_token(principal, self.expiration, self.audience, **kw)
 
-        if hasattr(request, '_jwt_cookie_reissued'):
+        if hasattr(request, "_jwt_cookie_reissued"):
             request._jwt_cookie_reissue_revoked = True
 
-        domains = kw.get('domains')
+        domains = kw.get("domains")
 
         return self._get_cookies(request, token, self.max_age, domains=domains)
 
@@ -241,22 +259,21 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
 
         claims = self.jwt_decode(request, cookie)
 
-        if reissue and not hasattr(request, '_jwt_cookie_reissued'):
+        if reissue and not hasattr(request, "_jwt_cookie_reissued"):
             self._handle_reissue(request, claims)
         return claims
 
     def _handle_reissue(self, request, claims):
         if not request or not claims:
-            raise AttributeError(
-                "Cannot handle JWT reissue: insufficient arguments")
+            raise AttributeError("Cannot handle JWT reissue: insufficient arguments")
 
-        if 'iat' not in claims:
+        if "iat" not in claims:
             raise ReissueError("Token claim's is missing IAT")
-        if 'sub' not in claims:
+        if "sub" not in claims:
             raise ReissueError("Token claim's is missing SUB")
 
-        token_dt = claims['iat']
-        principal = claims['sub']
+        token_dt = claims["iat"]
+        principal = claims["sub"]
         now = time.time()
 
         if now < token_dt + self.reissue_time:
@@ -264,14 +281,14 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             return
 
         extra_claims = dict(
-            filter(lambda item: item[0] not in self.jwt_std_claims,
-                   claims.items())
+            filter(lambda item: item[0] not in self.jwt_std_claims, claims.items())
         )
         headers = self.remember(request, principal, **extra_claims)
 
         def reissue_jwt_cookie(request, response):
-            if not hasattr(request, '_jwt_cookie_reissue_revoked'):
+            if not hasattr(request, "_jwt_cookie_reissue_revoked"):
                 for k, v in headers:
                     response.headerlist.append((k, v))
+
         request.add_response_callback(reissue_jwt_cookie)
         request._jwt_cookie_reissued = True

@@ -44,9 +44,7 @@ class Serializable(object):
 
 def extra_claims(request):
     return {
-        "token": request.create_jwt_token(
-            principal=1, extra_claim=NonSerializable()
-        )
+        "token": request.create_jwt_token(principal=1, extra_claim=NonSerializable())
     }
 
 
@@ -76,26 +74,18 @@ def app_config(base_config) -> Configurator:
     base_config.add_view(login_view, route_name="login", renderer="json")
 
     # Enable JWT authentication.
-    base_config.set_jwt_authentication_policy(
-        "secret",
-        http_header="X-Token"
-    )
+    base_config.set_jwt_authentication_policy("secret", http_header="X-Token")
     return base_config
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cookie_config(base_config):
     base_config.add_route("login", "/login")
-    base_config.add_view(
-        login_cookie_view, route_name="login", renderer="json"
-    )
+    base_config.add_view(login_cookie_view, route_name="login", renderer="json")
 
     # Enable JWT authentication on Cookies.
     base_config.set_jwt_cookie_authentication_policy(
-        'secret',
-        cookie_name='Token',
-        expiration=5,
-        reissue_time=1
+        "secret", cookie_name="Token", expiration=5, reissue_time=1
     )
     return base_config
 
@@ -172,26 +162,26 @@ def test_pyramid_custom_json_encoder(app_config: Configurator):
 
 
 def test_cookie_secured(cookie_app):
-    response = cookie_app.get('/secure', expect_errors=True)
+    response = cookie_app.get("/secure", expect_errors=True)
     assert response.status_int == 403
 
 
 def test_cookie_login(cookie_app):
-    response = cookie_app.get('/login')
-    assert 'Token' in cookie_app.cookies
+    response = cookie_app.get("/login")
+    assert "Token" in cookie_app.cookies
     assert response.body == b"OK"
 
-    response = cookie_app.get('/secure')
-    assert response.body == b'OK'
+    response = cookie_app.get("/secure")
+    assert response.body == b"OK"
 
 
 @pytest.mark.freeze_time
 def test_cookie_reiisue(cookie_app, freezer):
-    cookie_app.get('/login')
-    token = cookie_app.cookies.get('Token')
+    cookie_app.get("/login")
+    token = cookie_app.cookies.get("Token")
 
     freezer.tick(delta=4)
 
-    cookie_app.get('/secure')
-    other_token = cookie_app.cookies.get('Token')
+    cookie_app.get("/secure")
+    other_token = cookie_app.cookies.get("Token")
     assert token != other_token
