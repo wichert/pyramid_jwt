@@ -1,5 +1,7 @@
 # vim: fileencoding=utf-8
 import warnings
+from datetime import timedelta
+
 from webob import Request
 from zope.interface.verify import verifyObject
 from pyramid.security import forget
@@ -8,7 +10,7 @@ from pyramid.testing import testConfig
 from pyramid.testing import DummyRequest
 from pyramid.testing import DummySecurityPolicy
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid_jwt.policy import JWTAuthenticationPolicy, PyramidJSONEncoderFactory
+from pyramid_jwt.policy import JWTAuthenticationPolicy, PyramidJSONEncoderFactory, JWTTokenAuthenticationPolicy
 import uuid
 import pytest
 from json.encoder import JSONEncoder
@@ -176,3 +178,101 @@ def test_custom_json_encoder():
     request.jwt_claims = policy.get_claims(request)
     assert policy.unauthenticated_userid(request) == str(principal_id)
     assert request.jwt_claims.get("uuid_value") == str(claim_value)
+
+
+def test_cookie_policy_creation():
+    token_policy = JWTAuthenticationPolicy("secret")
+    request = Request.blank("/")
+    cookie_policy = JWTTokenAuthenticationPolicy.make_from(token_policy)
+
+    headers = cookie_policy.remember(request, "user")
+
+    assert isinstance(headers, list)
+    assert len(headers) == 1
+
+
+def test_cookie_policy_creation_fail():
+    with pytest.raises(TypeError) as e:
+        JWTTokenAuthenticationPolicy.make_from(object())
+
+    assert "Invalid policy type" in str(e.value)
+
+
+def test_cookie_policy_remember():
+    policy = JWTTokenAuthenticationPolicy("secret")
+    request = Request.blank("/")
+    headers = policy.remember(request, "user")
+
+    header, cookie = headers[0]
+    assert header.lower() == "set-cookie"
+
+    chunks = cookie.split('; ')
+    assert chunks[0].startswith(f"{policy.cookie_name}=")
+
+    assert "HttpOnly" in chunks
+    assert "secure" in chunks
+
+
+def test_cookie_policy_forget():
+    policy = JWTTokenAuthenticationPolicy("secret")
+    request = Request.blank("/")
+    headers = policy.forget(request)
+
+    header, cookie = headers[0]
+    assert header.lower() == "set-cookie"
+
+    chunks = cookie.split('; ')
+    cookie_values = [c for c in chunks if '=' in c]
+    assert cookie_values[0].startswith(f"{policy.cookie_name}=")
+
+    assert "Max-Age=0" in chunks
+    assert hasattr(request, '_jwt_cookie_reissue_revoked')
+
+
+def test_cookie_policy_custom_domain_list():
+    policy = JWTTokenAuthenticationPolicy("secret")
+    request = Request.blank("/")
+    domains = [request.domain, "other"]
+    headers = policy.remember(request, "user", domains=domains)
+
+    assert len(headers) == 2
+    _, cookie1 = headers[0]
+    _, cookie2 = headers[1]
+
+    assert f"Domain={request.domain}" in cookie1
+    assert f"Domain=other" in cookie2
+
+
+def test_insecure_cookie_policy():
+    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    request = Request.blank("/")
+    headers = policy.forget(request)
+
+    _, cookie = headers[0]
+    chunks = cookie.split('; ')
+
+    assert "secure" not in chunks
+
+
+def test_insecure_cookie_policy():
+    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    request = Request.blank("/")
+    headers = policy.forget(request)
+
+    _, cookie = headers[0]
+    chunks = cookie.split('; ')
+
+    assert "secure" not in chunks
+
+
+@pytest.mark.freeze_time
+def test_cookie_policy_max_age():
+    expiry = timedelta(seconds=10)
+    policy = JWTTokenAuthenticationPolicy("secret", expiration=expiry)
+    request = Request.blank("/")
+    headers = policy.forget(request)
+
+    _, cookie = headers[0]
+    chunks = cookie.split('; ')
+
+    assert "Max-Age=10" not in chunks
