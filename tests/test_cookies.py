@@ -6,7 +6,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 from webob import Request
 from zope.interface.verify import verifyObject
 
-from pyramid_jwt.policy import JWTTokenAuthenticationPolicy
+from pyramid_jwt.policy import JWTCookieAuthenticationPolicy
 
 
 @pytest.fixture(scope="module")
@@ -20,11 +20,11 @@ def dummy_request():
 
 
 def test_interface():
-    verifyObject(IAuthenticationPolicy, JWTTokenAuthenticationPolicy("secret"))
+    verifyObject(IAuthenticationPolicy, JWTCookieAuthenticationPolicy("secret"))
 
 
 def test_cookie(dummy_request, principal):
-    policy = JWTTokenAuthenticationPolicy("secret")
+    policy = JWTCookieAuthenticationPolicy("secret")
     cookie = policy.remember(dummy_request, principal).pop()
 
     assert len(cookie) == 2
@@ -35,7 +35,7 @@ def test_cookie(dummy_request, principal):
 
 
 def test_cookie_name(dummy_request, principal):
-    policy = JWTTokenAuthenticationPolicy("secret", cookie_name="auth")
+    policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth")
     _, cookie = policy.remember(dummy_request, principal).pop()
 
     name, value = cookie.split("=", 1)
@@ -43,7 +43,7 @@ def test_cookie_name(dummy_request, principal):
 
 
 def test_secure_cookie():
-    policy = JWTTokenAuthenticationPolicy("secret", https_only=True)
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=True)
     dummy_request = Request.blank("/")
     _, cookie = policy.remember(dummy_request, str(uuid.uuid4())).pop()
 
@@ -52,7 +52,7 @@ def test_secure_cookie():
 
 
 def test_insecure_cookie(dummy_request, principal):
-    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
     _, cookie = policy.remember(dummy_request, principal).pop()
 
     assert "; secure;" not in cookie
@@ -60,7 +60,7 @@ def test_insecure_cookie(dummy_request, principal):
 
 
 def test_cookie_decode(dummy_request, principal):
-    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
 
     header, cookie = policy.remember(dummy_request, principal).pop()
     name, value = cookie.split("=", 1)
@@ -73,7 +73,7 @@ def test_cookie_decode(dummy_request, principal):
 
 
 def test_cookie_max_age(dummy_request, principal):
-    policy = JWTTokenAuthenticationPolicy("secret", cookie_name="auth", expiration=100)
+    policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth", expiration=100)
     _, cookie = policy.remember(dummy_request, principal).pop()
     _, value = cookie.split("=", 1)
 
@@ -84,7 +84,7 @@ def test_cookie_max_age(dummy_request, principal):
 
 @pytest.mark.freeze_time
 def test_expired_token(dummy_request, principal, freezer):
-    policy = JWTTokenAuthenticationPolicy("secret", cookie_name="auth", expiration=1)
+    policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth", expiration=1)
     _, cookie = policy.remember(dummy_request, principal).pop()
     name, value = cookie.split("=", 1)
 

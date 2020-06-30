@@ -154,7 +154,7 @@ class ReissueError(Exception):
 
 
 @implementer(IAuthenticationPolicy)
-class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
+class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
     def __init__(
         self,
         private_key,
@@ -172,7 +172,7 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
         https_only=True,
         reissue_time=None,
     ):
-        super(JWTTokenAuthenticationPolicy, self).__init__(
+        super(JWTCookieAuthenticationPolicy, self).__init__(
             private_key,
             public_key,
             algorithm,
@@ -208,7 +208,7 @@ class JWTTokenAuthenticationPolicy(JWTAuthenticationPolicy):
             pol_type = policy.__class__.__name__
             raise TypeError("Invalid policy type %s" % pol_type)
 
-        return JWTTokenAuthenticationPolicy(
+        return JWTCookieAuthenticationPolicy(
             private_key=policy.private_key,
             public_key=policy.public_key,
             algorithm=policy.algorithm,

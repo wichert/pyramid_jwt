@@ -1,6 +1,6 @@
 from .policy import (
     JWTAuthenticationPolicy,
-    JWTTokenAuthenticationPolicy,
+    JWTCookieAuthenticationPolicy,
     json_encoder_factory,
 )
 
@@ -111,7 +111,7 @@ def set_jwt_cookie_authentication_policy(
         audience,
     )
 
-    auth_policy = JWTTokenAuthenticationPolicy.make_from(
+    auth_policy = JWTCookieAuthenticationPolicy.make_from(
         auth_policy,
         cookie_name=cookie_name,
         https_only=https_only,

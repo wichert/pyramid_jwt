@@ -13,7 +13,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 from pyramid_jwt.policy import (
     JWTAuthenticationPolicy,
     PyramidJSONEncoderFactory,
-    JWTTokenAuthenticationPolicy,
+    JWTCookieAuthenticationPolicy,
 )
 import uuid
 import pytest
@@ -187,7 +187,7 @@ def test_custom_json_encoder():
 def test_cookie_policy_creation():
     token_policy = JWTAuthenticationPolicy("secret")
     request = Request.blank("/")
-    cookie_policy = JWTTokenAuthenticationPolicy.make_from(token_policy)
+    cookie_policy = JWTCookieAuthenticationPolicy.make_from(token_policy)
 
     headers = cookie_policy.remember(request, "user")
 
@@ -197,13 +197,13 @@ def test_cookie_policy_creation():
 
 def test_cookie_policy_creation_fail():
     with pytest.raises(TypeError) as e:
-        JWTTokenAuthenticationPolicy.make_from(object())
+        JWTCookieAuthenticationPolicy.make_from(object())
 
     assert "Invalid policy type" in str(e.value)
 
 
 def test_cookie_policy_remember():
-    policy = JWTTokenAuthenticationPolicy("secret")
+    policy = JWTCookieAuthenticationPolicy("secret")
     request = Request.blank("/")
     headers = policy.remember(request, "user")
 
@@ -218,7 +218,7 @@ def test_cookie_policy_remember():
 
 
 def test_cookie_policy_forget():
-    policy = JWTTokenAuthenticationPolicy("secret")
+    policy = JWTCookieAuthenticationPolicy("secret")
     request = Request.blank("/")
     headers = policy.forget(request)
 
@@ -234,7 +234,7 @@ def test_cookie_policy_forget():
 
 
 def test_cookie_policy_custom_domain_list():
-    policy = JWTTokenAuthenticationPolicy("secret")
+    policy = JWTCookieAuthenticationPolicy("secret")
     request = Request.blank("/")
     domains = [request.domain, "other"]
     headers = policy.remember(request, "user", domains=domains)
@@ -248,7 +248,7 @@ def test_cookie_policy_custom_domain_list():
 
 
 def test_insecure_cookie_policy():
-    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
     request = Request.blank("/")
     headers = policy.forget(request)
 
@@ -259,7 +259,7 @@ def test_insecure_cookie_policy():
 
 
 def test_insecure_cookie_policy():
-    policy = JWTTokenAuthenticationPolicy("secret", https_only=False)
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
     request = Request.blank("/")
     headers = policy.forget(request)
 
@@ -272,7 +272,7 @@ def test_insecure_cookie_policy():
 @pytest.mark.freeze_time
 def test_cookie_policy_max_age():
     expiry = timedelta(seconds=10)
-    policy = JWTTokenAuthenticationPolicy("secret", expiration=expiry)
+    policy = JWTCookieAuthenticationPolicy("secret", expiration=expiry)
     request = Request.blank("/")
     headers = policy.forget(request)
 
