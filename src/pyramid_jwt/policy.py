@@ -206,7 +206,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
     def make_from(policy, **kwargs):
         if not isinstance(policy, JWTAuthenticationPolicy):
             pol_type = policy.__class__.__name__
-            raise TypeError("Invalid policy type %s" % pol_type)
+            raise ValueError("Invalid policy type %s" % pol_type)
 
         return JWTCookieAuthenticationPolicy(
             private_key=policy.private_key,
@@ -266,7 +266,9 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
 
     def _handle_reissue(self, request, claims):
         if not request or not claims:
-            raise AttributeError("Cannot handle JWT reissue: insufficient arguments")
+            raise ValueError(
+                "Cannot handle JWT reissue: insufficient arguments"
+            )
 
         if "iat" not in claims:
             raise ReissueError("Token claim's is missing IAT")

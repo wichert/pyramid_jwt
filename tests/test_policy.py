@@ -196,7 +196,7 @@ def test_cookie_policy_creation():
 
 
 def test_cookie_policy_creation_fail():
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(ValueError) as e:
         JWTCookieAuthenticationPolicy.make_from(object())
 
     assert "Invalid policy type" in str(e.value)
