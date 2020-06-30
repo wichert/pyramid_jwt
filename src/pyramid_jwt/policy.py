@@ -168,7 +168,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         callback=None,
         json_encoder=None,
         audience=None,
-        cookie_name="Authorization",
+        cookie_name=None,
         https_only=True,
         reissue_time=None,
     ):
@@ -187,7 +187,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         )
 
         self.https_only = https_only
-        self.cookie_name = cookie_name
+        self.cookie_name = cookie_name or "Authorization"
         self.max_age = self.expiration and self.expiration.total_seconds()
 
         if reissue_time and isinstance(reissue_time, datetime.timedelta):

@@ -93,9 +93,14 @@ def set_jwt_cookie_authentication_policy(
     json_encoder=None,
     audience=None,
     cookie_name=None,
-    https_only=False,
+    https_only=True,
     reissue_time=None,
 ):
+    settings = config.get_settings()
+    cookie_name = cookie_name or settings.get("jwt.cookie_name")
+    reissue_time = reissue_time or settings.get("jwt.cookie_reissue_time")
+    if https_only is None:
+        https_only = settings.get("jwt.https_only_cookie", True)
 
     auth_policy = create_jwt_authentication_policy(
         config,
