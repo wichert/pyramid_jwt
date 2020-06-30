@@ -103,7 +103,7 @@ deletion mechanism respected by most browsers, so a call to Pyramid's
 ``forget()`` function will instruct the browser remove that cookie, effectively
 throwing that JWT token away, even though it may still be valid.
 
-See :ref:`_cookie_examples` for examples.
+See `Creating a JWT within a cookie`_ for examples.
 
 Extra claims
 ------------
@@ -385,8 +385,8 @@ security backend, we need to also add the following to __init__.py:
 This code will map any properties of the "roles" attribute of the JWT, run them
 through the ACL and then tie them into pyramids security framework.
 
-.. _cookie_examples: Creating a JWT within a cookie
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Creating a JWT within a cookie
+------------------------------
 
 Since cookie-based authentication is already standardized within Pyramid by the
 ``remember()`` and ``forget()`` calls, you should simply use them:
