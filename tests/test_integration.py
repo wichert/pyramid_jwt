@@ -112,8 +112,11 @@ def cookie_config(base_config):
     # Enable JWT authentication on Cookies.
     reissue_time = timedelta(seconds=1)
     base_config.set_jwt_cookie_authentication_policy(
-        "secret", cookie_name="Token", expiration=5, reissue_time=reissue_time,
-        https_only=False
+        "secret",
+        cookie_name="Token",
+        expiration=5,
+        reissue_time=reissue_time,
+        https_only=False,
     )
     return base_config
 

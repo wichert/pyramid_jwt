@@ -266,9 +266,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
 
     def _handle_reissue(self, request, claims):
         if not request or not claims:
-            raise ValueError(
-                "Cannot handle JWT reissue: insufficient arguments"
-            )
+            raise ValueError("Cannot handle JWT reissue: insufficient arguments")
 
         if "iat" not in claims:
             raise ReissueError("Token claim's is missing IAT")
