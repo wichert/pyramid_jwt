@@ -60,10 +60,50 @@ authentication view for a REST backend could look something like this:
                 'result': 'error'
             }
 
-Since JWT is typically used via HTTP headers and does not use cookies the
+Unless you are using JWT cookies within cookies (see the next section), the
 standard ``remember()`` and ``forget()`` functions from Pyramid are not useful.
-Trying to use them while JWT authentication is enabled will result in a warning.
+Trying to use them while regular (header-based) JWT authentication is enabled
+will result in a warning.
 
+Using JWT inside cookies
+------------------------
+
+Optionally, you can use cookies as a transport for the JWT Cookies. This is an
+useful technique to allow browser-based web apps to consume your REST APIs
+without the hassle of managing token storage (where to store JWT cookies is a
+known-issue), since ``http_only`` cookies cannot be handled by Javascript
+running on the page
+
+Using JWT within cookies have some added benefits, the first one being *sliding
+sessions*: Tokens inside cookies will automatically be reissued whenever
+``reissue_time`` is past.
+
+.. code-block:: python
+
+   from pyramid.config import Configurator
+   from pyramid.authorization import ACLAuthorizationPolicy
+
+   def main():
+       config = Configurator()
+       # Pyramid requires an authorization policy to be active.
+       config.set_authorization_policy(ACLAuthorizationPolicy())
+       # Enable JWT authentication.
+       config.include('pyramid_jwt')
+       config.set_jwt_cookie_authentication_policy(
+           'secret', reissue_time=7200
+       )
+
+When working with JWT alone, there's no standard for manually invalidating a
+token: Either the token validity expires, or the application needs to handle a
+token blacklist (or even better, a whitelist)
+
+On the other hand, when using cookies, this library allows the app to *logout*
+a given user by erasing its cookie: This policy follows the standard cookie
+deletion mechanism respected by most browsers, so a call to Pyramid's
+``forget()`` function will instruct the browser remove that cookie, effectively
+throwing that JWT token away, even though it may still be valid.
+
+See `Creating a JWT within a cookie`_ for examples.
 
 Extra claims
 ------------
@@ -180,6 +220,21 @@ You can either set this in your .ini-file, or pass/override them directly to the
 | json_encoder |                 | None          | A subclass of JSONEncoder to be used       |
 |              |                 |               | to encode principal and claims infos.      |
 +--------------+-----------------+---------------+--------------------------------------------+
+
+The follow options applies to the cookie-based authentication policy:
+
++----------------+---------------------------+---------------+--------------------------------------------+
+| Parameter      | ini-file entry            | Default       | Description                                |
++================+===========================+===============+============================================+
+| cookie_name    | jwt.cookie_name           | Authorization | Key used to identify the cookie.           |
++----------------+---------------------------+---------------+--------------------------------------------+
+| https_only     | jwt.https_only_cookie     | True          | Whether or not the token should only be    |
+|                |                           |               | sent through a secure HTTPS transport      |
++----------------+---------------------------+---------------+--------------------------------------------+
+| reissue_time   | jwt.cookie_reissue_time   |  None         | Number of seconds (or a datetime.timedelta |
+|                |                           |               | instance) before a cookie (and the token   |
+|                |                           |               | within it) is reissued                     |
++----------------+---------------------------+---------------+--------------------------------------------+
 
 Pyramid JWT example use cases
 =============================
@@ -330,6 +385,41 @@ security backend, we need to also add the following to __init__.py:
 This code will map any properties of the "roles" attribute of the JWT, run them
 through the ACL and then tie them into pyramids security framework.
 
+Creating a JWT within a cookie
+------------------------------
+
+Since cookie-based authentication is already standardized within Pyramid by the
+``remember()`` and ``forget()`` calls, you should simply use them:
+
+.. code-block:: python
+
+   from pyramid.response import Response
+   from pyramid.security import remember
+
+   @view_config('login', request_method='POST', renderer='json')
+   def login_with_cookies(request):
+       '''Create a login view
+       '''
+       login = request.POST['login']
+       password = request.POST['password']
+       user = authenticate(login, password)  # From the previous snippet
+       if user:
+           headers = remember(
+               user['userid'],
+               roles=user['roles'],
+               userName=user['user_name']
+           )
+           return Response(headers=headers, body="OK")  # Or maybe redirect somewhere else
+       return Response(status=403)  # Or redirect back to login
+
+Please note that since the JWT cookies will be stored inside the cookies,
+there's no need for your app to explicitly include it on the response body.
+The browser (or whatever consuming this response) is responsible to keep that
+cookie for as long as it's valid, and re-send it on the following requests.
+
+Also note that there's no need to decode the cookie manually. The Policy
+handles that through the existing ``request.jwt_claims``.
+
 How is this secure?
 -------------------
 
@@ -340,6 +430,18 @@ tokens as part of the decode process, if it notices that the signature of the
 token is not as expected, it means either the application has been setup
 correctly with the wrong private key, OR an attacker has tried to manipulate
 the token.
+
+The major security concern when working with JWT tokens is where to store the
+token itself: While pyramid_jwt is able to detect tampered tokens, nothing can
+be done if the actual valid token leaks. Any user with a valid token will be
+correctly authenticated within your app. Storing the token securely is outside
+the scope of this library.
+
+When using JWT within a cookie, the browser (or tool consuming the cookie) is
+responsible for storing it, but pyramid_jwt does set the ``http_only`` flag on
+all cookies, so javascript running on the page cannot access these cookies,
+which helps mitigate XSS attacks. It's still mentioning that the tokens are
+still visible through the browser's debugging/inspection tools.
 
 Securing views with JWT's
 -------------------------

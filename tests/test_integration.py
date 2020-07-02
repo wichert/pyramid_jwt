@@ -1,14 +1,33 @@
+from datetime import timedelta
+
 import pytest
 from pyramid.config import Configurator
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.renderers import JSON
-from pyramid.security import Authenticated
-from pyramid.security import Allow
+from pyramid.response import Response
+from pyramid.security import Allow, Authenticated, remember, forget
 from webtest import TestApp
 
 
 def login_view(request):
     return {"token": request.create_jwt_token(1)}
+
+
+def login_cookie_view(request):
+    headers = remember(request, 1)
+    return Response(status=200, headers=headers, body="OK")
+
+
+def logout_cookie_view(request):
+    headers = forget(request)
+    return Response(status=200, headers=headers, body="OK")
+
+
+def suspicious_behaviour_view(request):
+    request._jwt_cookie_reissue_revoked = True
+    return Response(
+        status=200, body="Suspicious behaviour detected! Revoking cookie reissue"
+    )
 
 
 def secure_view(request):
@@ -43,16 +62,13 @@ def extra_claims(request):
     }
 
 
-@pytest.fixture(scope="module")
-def app_config() -> Configurator:
+@pytest.fixture(scope="function")
+def base_config() -> Configurator:
     config = Configurator()
     config.set_authorization_policy(ACLAuthorizationPolicy())
-    # Enable JWT authentication.
+
     config.include("pyramid_jwt")
     config.set_root_factory(Root)
-    config.set_jwt_authentication_policy("secret", http_header="X-Token")
-    config.add_route("login", "/login")
-    config.add_view(login_view, route_name="login", renderer="json")
     config.add_route("secure", "/secure")
     config.add_view(
         secure_view, route_name="secure", renderer="string", permission="read"
@@ -66,9 +82,54 @@ def app_config() -> Configurator:
     return config
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
+def app_config(base_config) -> Configurator:
+    base_config.add_route("login", "/login")
+    base_config.add_view(login_view, route_name="login", renderer="json")
+
+    # Enable JWT authentication.
+    base_config.set_jwt_authentication_policy("secret", http_header="X-Token")
+    return base_config
+
+
+@pytest.fixture(scope="function")
+def cookie_config(base_config):
+    base_config.add_route("login", "/login")
+    base_config.add_view(login_cookie_view, route_name="login", renderer="json")
+    base_config.add_route("logout", "/logout")
+    base_config.add_view(
+        logout_cookie_view, route_name="logout", renderer="string", permission="read"
+    )
+
+    base_config.add_route("suspicious", "/suspicious")
+    base_config.add_view(
+        suspicious_behaviour_view,
+        route_name="suspicious",
+        renderer="string",
+        permission="read",
+    )
+
+    # Enable JWT authentication on Cookies.
+    reissue_time = timedelta(seconds=1)
+    base_config.set_jwt_cookie_authentication_policy(
+        "secret",
+        cookie_name="Token",
+        expiration=5,
+        reissue_time=reissue_time,
+        https_only=False,
+    )
+    return base_config
+
+
+@pytest.fixture(scope="function")
 def app(app_config):
     app = app_config.make_wsgi_app()
+    return TestApp(app)
+
+
+@pytest.fixture(scope="function")
+def cookie_app(cookie_config):
+    app = cookie_config.make_wsgi_app()
     return TestApp(app)
 
 
@@ -129,3 +190,57 @@ def test_pyramid_custom_json_encoder(app_config: Configurator):
 
     response = app.get("/dump_claims", headers={"X-Token": token})
     assert response.json_body["extra_claim"] == "other_serializer"
+
+
+def test_cookie_secured(cookie_app):
+    response = cookie_app.get("/secure", expect_errors=True)
+    assert response.status_int == 403
+
+
+def test_cookie_login(cookie_app):
+    response = cookie_app.get("/login")
+    assert "Token" in cookie_app.cookies
+    assert response.body == b"OK"
+
+    response = cookie_app.get("/secure")
+    assert response.body == b"OK"
+
+
+def test_cookie_logout(cookie_app):
+    response = cookie_app.get("/login")
+    assert "Token" in cookie_app.cookies
+    assert response.body == b"OK"
+
+    response = cookie_app.get("/secure")
+    assert response.body == b"OK"
+
+    response = cookie_app.get("/logout")
+    assert response.body == b"OK"
+    assert "Token" not in cookie_app.cookies
+
+    response = cookie_app.get("/secure", expect_errors=True)
+    assert response.status_int == 403
+
+
+@pytest.mark.freeze_time
+def test_cookie_reissue(cookie_app, freezer):
+    cookie_app.get("/login")
+    token = cookie_app.cookies.get("Token")
+
+    freezer.tick(delta=4)
+
+    cookie_app.get("/secure")
+    other_token = cookie_app.cookies.get("Token")
+    assert token != other_token
+
+
+@pytest.mark.freeze_time
+def test_cookie_reissue_revoke(cookie_app, freezer):
+    cookie_app.get("/login")
+    token = cookie_app.cookies.get("Token")
+
+    freezer.tick(delta=4)
+
+    cookie_app.get("/suspicious")
+    other_token = cookie_app.cookies.get("Token")
+    assert token == other_token
