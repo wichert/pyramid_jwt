@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.6.0 - July 9, 2020
+--------------------
+
+- `Pull request #27 <https://github.com/wichert/pyramid_jwt/pull/27>`_:
+  add support for JWT tokens in cookies. 
+  From `phrfpeixoto <https://github.com/phrfpeixoto>`_
+
 1.5.1 - May 5, 2020
 -------------------
 
