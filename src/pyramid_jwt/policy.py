@@ -199,7 +199,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
             secure=self.https_only,
             max_age=self.max_age,
             httponly=True,
-            path=None,
+            path="/",
         )
 
     @staticmethod
