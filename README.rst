@@ -228,6 +228,8 @@ The follow options applies to the cookie-based authentication policy:
 +================+===========================+===============+============================================+
 | cookie_name    | jwt.cookie_name           | Authorization | Key used to identify the cookie.           |
 +----------------+---------------------------+---------------+--------------------------------------------+
+| cookie_path    | jwt.cookie_path           | None          | Path for cookie.                           |
++----------------+---------------------------+---------------+--------------------------------------------+
 | https_only     | jwt.https_only_cookie     | True          | Whether or not the token should only be    |
 |                |                           |               | sent through a secure HTTPS transport      |
 +----------------+---------------------------+---------------+--------------------------------------------+

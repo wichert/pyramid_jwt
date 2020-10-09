@@ -95,10 +95,11 @@ def set_jwt_cookie_authentication_policy(
     cookie_name=None,
     https_only=True,
     reissue_time=None,
-    path=None,
+    cookie_path=None,
 ):
     settings = config.get_settings()
     cookie_name = cookie_name or settings.get("jwt.cookie_name")
+    cookie_path = cookie_path or settings.get("jwt.cookie_path")
     reissue_time = reissue_time or settings.get("jwt.cookie_reissue_time")
     if https_only is None:
         https_only = settings.get("jwt.https_only_cookie", True)
@@ -122,7 +123,7 @@ def set_jwt_cookie_authentication_policy(
         cookie_name=cookie_name,
         https_only=https_only,
         reissue_time=reissue_time,
-        path=path,
+        cookie_path=cookie_path,
     )
 
     _configure(config, auth_policy)
