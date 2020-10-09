@@ -1,11 +1,19 @@
 Changelog
 =========
 
+1.6.1 - October 9, 2020
+-----------------------
+
+- `Pull request #46 <https://github.com/wichert/pyramid_jwt/pull/46>`_:
+  allow configurating the path for JWT cookies.
+  From `surfjudge <https://github.com/surfjudge>`_
+
+
 1.6.0 - July 9, 2020
 --------------------
 
 - `Pull request #27 <https://github.com/wichert/pyramid_jwt/pull/27>`_:
-  add support for JWT tokens in cookies. 
+  add support for JWT tokens in cookies.
   From `phrfpeixoto <https://github.com/phrfpeixoto>`_
 
 1.5.1 - May 5, 2020
