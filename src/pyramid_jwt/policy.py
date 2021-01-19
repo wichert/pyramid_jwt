@@ -6,6 +6,7 @@ from json import JSONEncoder
 
 import jwt
 from pyramid.renderers import JSON
+from pyramid.settings import asbool
 from webob.cookies import CookieProfile
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
@@ -187,7 +188,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
             audience,
         )
 
-        self.https_only = https_only
+        self.https_only = asbool(https_only)
         self.cookie_name = cookie_name or "Authorization"
         self.max_age = self.expiration and self.expiration.total_seconds()
 
