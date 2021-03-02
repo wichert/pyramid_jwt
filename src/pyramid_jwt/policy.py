@@ -193,7 +193,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
 
         if reissue_time and isinstance(reissue_time, datetime.timedelta):
             reissue_time = reissue_time.total_seconds()
-        self.reissue_time = reissue_time
+        self.reissue_time = int(reissue_time) if reissue_time is not None else None
 
         self.cookie_profile = CookieProfile(
             cookie_name=self.cookie_name,
