@@ -6,6 +6,7 @@ from json import JSONEncoder
 
 import jwt
 from pyramid.renderers import JSON
+from pyramid.settings import asbool
 from webob.cookies import CookieProfile
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
@@ -172,6 +173,8 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         https_only=True,
         reissue_time=None,
         cookie_path=None,
+        accept_header=False,
+        header_first=False,
     ):
         super(JWTCookieAuthenticationPolicy, self).__init__(
             private_key,
@@ -194,6 +197,8 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         if reissue_time and isinstance(reissue_time, datetime.timedelta):
             reissue_time = reissue_time.total_seconds()
         self.reissue_time = reissue_time
+        self.accept_header = asbool(accept_header)
+        self.header_first = asbool(header_first)
 
         self.cookie_profile = CookieProfile(
             cookie_name=self.cookie_name,
@@ -251,6 +256,13 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         return self._get_cookies(request, None)
 
     def get_claims(self, request):
+        if self.accept_header:
+            if self.header_first:
+                return super().get_claims(request) or self.get_cookie_claims(request)
+            return self.get_cookie_claims(request) or super().get_claims(request)
+        return self.get_cookie_claims(request)
+
+    def get_cookie_claims(self, request):
         profile = self.cookie_profile.bind(request)
         cookie = profile.get_value()
 
