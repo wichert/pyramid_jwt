@@ -233,6 +233,9 @@ The follow options applies to the cookie-based authentication policy:
 | https_only     | jwt.https_only_cookie     | True          | Whether or not the token should only be    |
 |                |                           |               | sent through a secure HTTPS transport      |
 +----------------+---------------------------+---------------+--------------------------------------------+
+| samesite       | jwt.samesite              | one           | Set the 'SameSite' attribute of the cookie |
+|                |                           |               | can be 'strict', 'lax', 'none'             |
++----------------+---------------------------+---------------+--------------------------------------------+
 | reissue_time   | jwt.cookie_reissue_time   |  None         | Number of seconds (or a datetime.timedelta |
 |                |                           |               | instance) before a cookie (and the token   |
 |                |                           |               | within it) is reissued                     |
