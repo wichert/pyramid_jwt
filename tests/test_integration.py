@@ -14,7 +14,7 @@ def login_view(request):
 
 
 def login_cookie_view(request):
-    headers = remember(request, 1)
+    headers = remember(request, request.create_jwt_token(1))
     return Response(status=200, headers=headers, body="OK")
 
 

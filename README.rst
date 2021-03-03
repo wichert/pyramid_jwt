@@ -223,20 +223,24 @@ You can either set this in your .ini-file, or pass/override them directly to the
 
 The follow options applies to the cookie-based authentication policy:
 
-+----------------+---------------------------+---------------+--------------------------------------------+
-| Parameter      | ini-file entry            | Default       | Description                                |
-+================+===========================+===============+============================================+
-| cookie_name    | jwt.cookie_name           | Authorization | Key used to identify the cookie.           |
-+----------------+---------------------------+---------------+--------------------------------------------+
-| cookie_path    | jwt.cookie_path           | None          | Path for cookie.                           |
-+----------------+---------------------------+---------------+--------------------------------------------+
-| https_only     | jwt.https_only_cookie     | True          | Whether or not the token should only be    |
-|                |                           |               | sent through a secure HTTPS transport      |
-+----------------+---------------------------+---------------+--------------------------------------------+
-| reissue_time   | jwt.cookie_reissue_time   |  None         | Number of seconds (or a datetime.timedelta |
-|                |                           |               | instance) before a cookie (and the token   |
-|                |                           |               | within it) is reissued                     |
-+----------------+---------------------------+---------------+--------------------------------------------+
++------------------+---------------------------+---------------+--------------------------------------------+
+| Parameter        | ini-file entry            | Default       | Description                                |
++==================+===========================+===============+============================================+
+| cookie_name      | jwt.cookie_name           | Authorization | Key used to identify the cookie.           |
++------------------+---------------------------+---------------+--------------------------------------------+
+| cookie_path      | jwt.cookie_path           | None          | Path for cookie.                           |
++------------------+---------------------------+---------------+--------------------------------------------+
+| https_only       | jwt.https_only_cookie     | True          | Whether or not the token should only be    |
+|                  |                           |               | sent through a secure HTTPS transport      |
++------------------+---------------------------+---------------+--------------------------------------------+
+| reissue_time     | jwt.cookie_reissue_time   |  None         | Number of seconds (or a datetime.timedelta |
+|                  |                           |               | instance) before a cookie (and the token   |
+|                  |                           |               | within it) is reissued                     |
++------------------+---------------------------+---------------+--------------------------------------------+
+| reissue_callback | n/a                       | None          | A callback function to be called when      |
+|                  |                           |               | re-issuing cookies; see                    |
+|                  |                           |               | `Using a reissue callback`_                |
++------------------+---------------------------+---------------+--------------------------------------------+
 
 Pyramid JWT example use cases
 =============================
@@ -390,8 +394,10 @@ through the ACL and then tie them into pyramids security framework.
 Creating a JWT within a cookie
 ------------------------------
 
-Since cookie-based authentication is already standardized within Pyramid by the
-``remember()`` and ``forget()`` calls, you should simply use them:
+While cookie-based authentication is standardized within Pyramid by the
+``remember()`` and ``forget()`` calls, in order to accomodate more exotic use
+cases, we're passing a constructed JWT token to the ``remember()`` call instead
+of passing the pricipal and claims directly:
 
 .. code-block:: python
 
@@ -406,21 +412,59 @@ Since cookie-based authentication is already standardized within Pyramid by the
        password = request.POST['password']
        user = authenticate(login, password)  # From the previous snippet
        if user:
-           headers = remember(
+           token = request.create_jwt_token(
                user['userid'],
                roles=user['roles'],
                userName=user['user_name']
            )
+           headers = remember(token)
            return Response(headers=headers, body="OK")  # Or maybe redirect somewhere else
        return Response(status=403)  # Or redirect back to login
 
-Please note that since the JWT cookies will be stored inside the cookies,
+The benefit of passing a constructed JWT token to ``remember()`` is that
+we can pass a token constructed by a third party, i.e. we can use an
+authentication endpoint that can return JWT tokens signed with an assymetric
+cryptographic algorithm.
+
+Please note that since the JWT token will be stored inside the cookies,
 there's no need for your app to explicitly include it on the response body.
 The browser (or whatever consuming this response) is responsible to keep that
 cookie for as long as it's valid, and re-send it on the following requests.
 
 Also note that there's no need to decode the cookie manually. The Policy
 handles that through the existing ``request.jwt_claims``.
+
+Using a reissue callback
+------------------------
+
+The JWT cookie policy accepts a callback to be used when the cookie needs to be
+re-issued. The callback signature is:
+
+.. code-block:: python
+
+    def reissue_callback(request, principal, **claims):
+        pass
+
+and should return a constructed JWT token. When not provided a callback the
+default behaviour is equivalent to the following:
+
+.. code-block:: python
+
+    def reissue_callback(request, principal, **claims):
+        return request.create_jwt_token(principal, **claims)
+
+Providing a reissue callback is useful in two cases:
+
+1. refreshing the extra claims from a database or a third party and
+   re-encoding them in the generated token; this is useful when the claims
+   can change and you want the changes to be reflected when the cookie is
+   re-issued
+
+2. re-issuing a cookie that is not generated locally and there is an equivalent
+   re-issuing mechanism availabile over the authenticating API.
+
+If you want to prevent the refresh from going ahead you can return a falsey
+value in the callback. This will stop the reissue from going ahead.
 
 How is this secure?
 -------------------
