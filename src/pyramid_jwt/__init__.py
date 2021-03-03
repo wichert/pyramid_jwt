@@ -159,7 +159,7 @@ def set_jwt_cookie_authentication_policy(
         reissue_time,
         cookie_path,
     )
-    _configure(config, policy)
+    configure_jwt_authentication_policy(config, policy)
 
 
 def set_jwt_authentication_policy(
@@ -189,4 +189,4 @@ def set_jwt_authentication_policy(
         audience,
     )
 
-    _configure(config, policy)
+    configure_jwt_authentication_policy(config, policy)
