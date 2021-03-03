@@ -470,3 +470,39 @@ could only access permissions with "reports". Obviously in our use case, one
 user had both "admin" and "reports" permissions, so they would be able to
 access any view regardless.
 
+Integrating with pyramid_authstack
+----------------------------------
+
+If you are using `pyramid_authstack <https://github.com/wichert/pyramid_authstack>`_
+and you need to add pyramid_jwt you can follow the example below:
+
+.. code-block:: python
+
+    from pyramid.authentication import AuthTktAuthenticationPolicy
+    from pyramid_authstack import AuthenticationStackPolicy
+    from pyramid_jwt import (
+        create_jwt_authentication_policy,
+        configure_jwt_authentication_policy
+    )
+
+    auth_policy = AuthenticationStackPolicy()
+    # Add an AuthTktAuthenticationPolicy
+    auth_policy.add_policy(
+        'ticket',
+        AuthTktAuthenticationPolicy('secret', timeout=60 * 60))
+    # Create a JWT authentication policy
+    jwt_policy = create_jwt_authentication_policy(config)
+    # configure the JWT policy -- this creates request property method jwt_claims
+    # and method create_jwt_token. We pass register=False so that the policy
+    # does not get registered, we will register the stack policy ourselves
+    configure_jwt_authentication_policy(config, jwt_policy, register=False)
+    auth_policy.add_policy('jwt', jwt_policy)
+    config.set_authentication_policy(auth_policy)
+
+Please bear in mind that ``request.jwt_claims`` will return an empty dictionary
+if the request was not authenticated using the JWT policy.
+
+You can similarly register a cookie-based JWT authentication policy using the
+function ``create_jwt_cookie_authentication_policy``. The same configuration
+function, ``configure_jwt_authentication_policy`` can be used with either policy
+type.
