@@ -72,6 +72,20 @@ def test_cookie_decode(dummy_request, principal):
     assert claims["sub"] == principal
 
 
+def test_invalid_cookie_reissue(dummy_request, principal):
+    policy = JWTCookieAuthenticationPolicy("secret", https_only=False, reissue_time=10)
+
+    token = "invalid value"
+    header, cookie = policy.remember(dummy_request, token).pop()
+    name, value = cookie.split("=", 1)
+
+    value, _ = value.split(";", 1)
+    dummy_request.cookies = {name: value}
+
+    claims = policy.get_claims(dummy_request)
+    assert not claims
+
+
 def test_cookie_max_age(dummy_request, principal):
     policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth", expiration=100)
     _, cookie = policy.remember(dummy_request, principal).pop()
