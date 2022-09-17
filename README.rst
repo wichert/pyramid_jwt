@@ -200,7 +200,7 @@ You can either set this in your .ini-file, or pass/override them directly to the
 | private_key  | jwt.private_key |               | Key used to hash or sign tokens.           |
 +--------------+-----------------+---------------+--------------------------------------------+
 | public_key   | jwt.public_key  |               | Key used to verify token signatures. Only  |
-|              |                 |               | used with assymetric algorithms.           |
+|              |                 |               | used with asymmetric algorithms.           |
 +--------------+-----------------+---------------+--------------------------------------------+
 | algorithm    | jwt.algorithm   | HS512         | Hash or encryption algorithm               |
 +--------------+-----------------+---------------+--------------------------------------------+
