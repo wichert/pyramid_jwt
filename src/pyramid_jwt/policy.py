@@ -261,6 +261,10 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
 
         claims = self.jwt_decode(request, cookie)
 
+        # bypass reissue if cookie was invalid
+        if not claims:
+            return {}
+
         if reissue and not hasattr(request, "_jwt_cookie_reissued"):
             self._handle_reissue(request, claims)
         return claims
