@@ -6,6 +6,7 @@ from json import JSONEncoder
 
 import jwt
 from pyramid.renderers import JSON
+from pyramid.settings import asbool
 from webob.cookies import CookieProfile
 from zope.interface import implementer
 from pyramid.authentication import CallbackAuthenticationPolicy
@@ -187,7 +188,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
             audience,
         )
 
-        self.https_only = https_only
+        self.https_only = asbool(https_only)
         self.cookie_name = cookie_name or "Authorization"
         self.max_age = self.expiration and self.expiration.total_seconds()
 
@@ -246,9 +247,12 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
 
         return self._get_cookies(request, token, self.max_age, domains=domains)
 
-    def forget(self, request):
+    def forget(self, request, **kw):
         request._jwt_cookie_reissue_revoked = True
-        return self._get_cookies(request, None)
+
+        domains = kw.get("domains")
+
+        return self._get_cookies(request, None, domains=domains)
 
     def get_claims(self, request):
         profile = self.cookie_profile.bind(request)
