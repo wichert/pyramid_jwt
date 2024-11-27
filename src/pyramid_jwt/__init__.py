@@ -93,7 +93,7 @@ def set_jwt_cookie_authentication_policy(
     json_encoder=None,
     audience=None,
     cookie_name=None,
-    https_only=True,
+    https_only=None,
     reissue_time=None,
     cookie_path=None,
 ):
