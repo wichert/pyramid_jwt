@@ -25,7 +25,8 @@ def test_interface():
 
 def test_cookie(dummy_request, principal):
     policy = JWTCookieAuthenticationPolicy("secret")
-    cookie = policy.remember(dummy_request, principal).pop()
+    token = policy.create_token(principal)
+    cookie = policy.remember(dummy_request, token).pop()
 
     assert len(cookie) == 2
 
@@ -36,7 +37,8 @@ def test_cookie(dummy_request, principal):
 
 def test_cookie_name(dummy_request, principal):
     policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth")
-    _, cookie = policy.remember(dummy_request, principal).pop()
+    token = policy.create_token(principal)
+    _, cookie = policy.remember(dummy_request, token).pop()
 
     name, value = cookie.split("=", 1)
     assert name == "auth"
@@ -45,7 +47,8 @@ def test_cookie_name(dummy_request, principal):
 def test_secure_cookie():
     policy = JWTCookieAuthenticationPolicy("secret", https_only=True)
     dummy_request = Request.blank("/")
-    _, cookie = policy.remember(dummy_request, str(uuid.uuid4())).pop()
+    token = policy.create_token(str(uuid.uuid4()))
+    _, cookie = policy.remember(dummy_request, token).pop()
 
     assert "; secure;" in cookie
     assert "; HttpOnly" in cookie
@@ -53,7 +56,8 @@ def test_secure_cookie():
 
 def test_insecure_cookie(dummy_request, principal):
     policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
-    _, cookie = policy.remember(dummy_request, principal).pop()
+    token = policy.create_token(principal)
+    _, cookie = policy.remember(dummy_request, token).pop()
 
     assert "; secure;" not in cookie
     assert "; HttpOnly" in cookie
@@ -62,7 +66,8 @@ def test_insecure_cookie(dummy_request, principal):
 def test_cookie_decode(dummy_request, principal):
     policy = JWTCookieAuthenticationPolicy("secret", https_only=False)
 
-    header, cookie = policy.remember(dummy_request, principal).pop()
+    token = policy.create_token(principal)
+    header, cookie = policy.remember(dummy_request, token).pop()
     name, value = cookie.split("=", 1)
 
     value, _ = value.split(";", 1)
@@ -85,7 +90,8 @@ def test_cookie_max_age(dummy_request, principal):
 @pytest.mark.freeze_time
 def test_expired_token(dummy_request, principal, freezer):
     policy = JWTCookieAuthenticationPolicy("secret", cookie_name="auth", expiration=1)
-    _, cookie = policy.remember(dummy_request, principal).pop()
+    token = policy.create_token(principal)
+    _, cookie = policy.remember(dummy_request, token).pop()
     name, value = cookie.split("=", 1)
 
     freezer.tick(delta=2)
