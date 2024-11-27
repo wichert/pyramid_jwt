@@ -237,6 +237,13 @@ The follow options applies to the cookie-based authentication policy:
 |                |                           |               | instance) before a cookie (and the token   |
 |                |                           |               | within it) is reissued                     |
 +----------------+---------------------------+---------------+--------------------------------------------+
+| accept_header  | jwt.cookie_accept_header  |  False        | If cookie authentication doesn't return    |
+|                |                           |               | any claims, try to decode JWT header too   |
++----------------+---------------------------+---------------+--------------------------------------------+
+| header_first   | jwt.cookie_prefer_header  |  False        | Try to decode JWT header BEFORE decoding   |
+|                |                           |               | the cookie value. Set accept_header=True   |
+|                |                           |               | for this to take effect                    |
++----------------+---------------------------+---------------+--------------------------------------------+
 
 Pyramid JWT example use cases
 =============================
