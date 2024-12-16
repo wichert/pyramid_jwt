@@ -170,6 +170,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         audience=None,
         cookie_name=None,
         https_only=True,
+        samesite=None,
         reissue_time=None,
         cookie_path=None,
     ):
@@ -188,6 +189,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         )
 
         self.https_only = https_only
+        self.samesite = samesite
         self.cookie_name = cookie_name or "Authorization"
         self.max_age = self.expiration and self.expiration.total_seconds()
 
@@ -198,6 +200,7 @@ class JWTCookieAuthenticationPolicy(JWTAuthenticationPolicy):
         self.cookie_profile = CookieProfile(
             cookie_name=self.cookie_name,
             secure=self.https_only,
+            samesite=self.samesite,
             max_age=self.max_age,
             httponly=True,
             path=cookie_path,
