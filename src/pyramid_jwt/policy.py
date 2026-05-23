@@ -80,7 +80,7 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         payload = self.default_claims.copy()
         payload.update(claims)
         payload["sub"] = principal
-        payload["iat"] = iat = datetime.datetime.utcnow()
+        payload["iat"] = iat = datetime.datetime.now(datetime.timezone.utc)
         expiration = expiration or self.expiration
         audience = audience or self.audience
         if expiration:
