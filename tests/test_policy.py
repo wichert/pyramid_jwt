@@ -39,6 +39,28 @@ def test_minimal_roundtrip():
     assert policy.unauthenticated_userid(request) == 15
 
 
+@pytest.mark.parametrize(
+    "http_header", ["authorization", "AUTHORIZATION", "aUtHoRiZaTiOn"]
+)
+@pytest.mark.parametrize("auth_type", ["JWT", "Bearer"])
+def test_authorization_header_case_roundtrip(http_header, auth_type):
+    policy = JWTAuthenticationPolicy(
+        "secret", http_header=http_header, auth_type=auth_type
+    )
+    request = Request.blank("/")
+    request.authorization = (auth_type, policy.create_token("user"))
+    request.jwt_claims = policy.get_claims(request)
+    assert policy.unauthenticated_userid(request) == "user"
+
+
+@pytest.mark.parametrize("http_header", ["authorization", "AUTHORIZATION"])
+def test_authorization_header_case_rejects_wrong_scheme(http_header):
+    policy = JWTAuthenticationPolicy("secret", http_header=http_header)
+    request = Request.blank("/")
+    request.authorization = ("Other", policy.create_token("user"))
+    assert policy.get_claims(request) == {}
+
+
 def test_audience_valid():
     policy = JWTAuthenticationPolicy("secret", audience="example.org")
     token = policy.create_token(15, name="Jöhn", admin=True, audience="example.org")

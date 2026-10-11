@@ -100,13 +100,13 @@ class JWTAuthenticationPolicy(CallbackAuthenticationPolicy):
         return token
 
     def get_claims(self, request):
-        if self.http_header == "Authorization":
+        if self.http_header.lower() == "authorization":
             try:
                 if request.authorization is None:
                     return {}
             except ValueError:  # Invalid Authorization header
                 return {}
-            (auth_type, token) = request.authorization
+            auth_type, token = request.authorization
             if auth_type != self.auth_type:
                 return {}
         else:
